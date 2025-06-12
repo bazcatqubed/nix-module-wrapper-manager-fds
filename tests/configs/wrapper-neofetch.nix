@@ -20,6 +20,7 @@
     ];
   };
 
+  # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
     actuallyBuilt =
       let
@@ -29,4 +30,5 @@
         [ -x "${wrapper}/bin/${config.wrappers.neofetch.executableName}" ] && touch $out
       '';
   };
+  # end::test[]
 }

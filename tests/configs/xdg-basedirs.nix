@@ -41,6 +41,7 @@
       builtins.toString app;
   };
 
+  # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
     actuallyBuilt =
       let
@@ -54,4 +55,5 @@
         } && touch $out
       '';
   };
+  # end::test[]
 }

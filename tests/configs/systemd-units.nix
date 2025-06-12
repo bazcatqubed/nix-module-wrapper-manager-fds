@@ -140,6 +140,7 @@
     };
   };
 
+  # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
     actuallyBuilt =
       let
@@ -178,4 +179,5 @@
           && systemd.user.services."gnome-session-manager@one.foodogsquared.HorizontalHunger/10-gnome-session-wrapper-manager-override".name == "gnome-session-manager@one.foodogsquared.HorizontalHunger.service"
         ) pkgs.emptyFile;
   };
+  # end::test[]
 }

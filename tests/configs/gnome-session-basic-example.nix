@@ -80,12 +80,16 @@ in
     };
   };
 
+  # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
     actuallyBuilt = let
       wrapper = config.build.toplevel;
     in
       pkgs.runCommand "wrapper-manager-test-gnome-session-actually-built" { } ''
-        [ -x "${wrapper}/libexec/${workflowId}-session" ] \
+        # This should only contain a gnome-session-configured desktop session
+        # and nothing else.
+        [ ! -d "${wrapper}/bin" ] \
+        && [ -x "${wrapper}/libexec/${workflowId}-session" ] \
         && [ -f "${wrapper}/share/gnome-session/sessions/${workflowId}.session" ] \
         && [ -f "${wrapper}/share/wayland-sessions/${workflowId}.desktop" ] \
         && [ -f "${wrapper}/share/applications/${workflowId}.desktop-widgets.desktop" ] \
@@ -120,4 +124,5 @@ in
         && workflowSettings.components.window-manager.systemd.pathUnit == null
       ) pkgs.emptyFile;
   };
+  # end::test[]
 }

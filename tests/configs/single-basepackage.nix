@@ -18,6 +18,7 @@
     xdg.desktopEntry.enable = true;
   };
 
+  # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
     singleBasePackage =
       let
@@ -27,4 +28,5 @@
         [ -e "${wrapper}/share/applications/fastfetch-guix.desktop" ] && [ -x "${wrapper}/bin/${config.wrappers.fastfetch-guix.executableName}" ] && touch $out
       '';
   };
+  # end::test[]
 }

@@ -26,13 +26,17 @@
     ]
   );
 
+  # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
     actuallyBuilt =
       let
         wrapper = config.build.toplevel;
       in
       pkgs.runCommand "wrapper-manager-fastfetch-actually-built" { } ''
-        [ -e "${wrapper}/share/applications/fastfetch.desktop" ] && [ -x "${wrapper}/bin/${config.wrappers.fastfetch.executableName}" ] && touch $out
+        [ -e "${wrapper}/share/applications/fastfetch.desktop" ] \
+        && [ -x "${wrapper}/bin/${config.wrappers.fastfetch.executableName}" ] \
+        && touch $out
       '';
   };
+  # end::test[]
 }

@@ -27,6 +27,7 @@
     exec = "nvim";
   };
 
+  # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
     actuallyBuilt =
       let
@@ -38,5 +39,5 @@
           && [ -x "${wrapper}/bin/${config.wrappers.nvim.executableName}" ] && touch $out
       '';
   };
-
+  # end::test[]
 }

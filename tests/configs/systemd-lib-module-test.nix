@@ -126,6 +126,7 @@ in
       files."${customSystemdDir}".source =
         wrapperManagerLib.systemd.generateUnits { inherit (cfg) units; };
 
+      # tag::test[]
       build.extraPassthru.wrapperManagerTests = {
         actuallyBuilt = let
           wrapper = config.build.toplevel;
@@ -140,6 +141,7 @@ in
             && touch $out
           '';
       };
+      # end::test[]
     }
   ];
 }
