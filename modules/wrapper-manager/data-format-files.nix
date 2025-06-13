@@ -117,6 +117,18 @@ in
         example = false;
       };
 
+    enableExtraFormats =
+      lib.mkEnableOption null // {
+        description = ''
+          Whether to initialize extra data formats from other modules.
+
+          :::{.note}
+          For third-party module authors, you can use this option as the basis
+          for adding your own data formats.
+          :::
+        '';
+      };
+
     files = lib.mkOption {
       type = with lib.types; attrsOf (submodule dataFileModule);
       default = { };
