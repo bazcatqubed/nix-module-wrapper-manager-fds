@@ -22,6 +22,7 @@ in
   systemd-units = build { modules = [ ./systemd-units.nix ]; };
   systemd-unit-data-format-files = build { modules = [ ./systemd-unit-data-format-files.nix ]; };
   wrappers-with-systemd-units = build { modules = [ ./wrappers-with-systemd-enabled.nix ]; };
+  wrappers-for-yt-dlp = build { modules = [ ./wrappers-for-yt-dlp.nix ]; };
   data-format-files = build { modules = [ ./data-format-files.nix ]; };
   gnome-session-basic-example = build { modules = [ ./gnome-session-basic-example.nix ]; };
 
