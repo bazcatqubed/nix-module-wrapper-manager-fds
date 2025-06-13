@@ -1,6 +1,14 @@
 = Project overview
 
-wrapper-manager-fds is foodogsquared's reimagining of https://github.com/viperML/wrapper-manager/[wrapper-manager].
+wrapper-manager-fds is foodogsquared's reimagining of https://github.com/viperML/wrapper-manager/[wrapper-manager], a Nix module environment for configuring wrappers along with more integrations as seen from the xref:./user-guide.adoc[].
+
+Among other things, wrapper-manager-fds allows you to do the following:
+
+* xref:./user-guide.adoc#xdg-integration[Quickly create wrappers and their XDG desktop entries] to be included as part of an application launcher.
+* xref:./user-guide.adoc#generating-systemd-units[Generate systemd units] useful for creating services and setting up scheduling, file watches, and sockets.
+* Create custom desktop sessions through gnome-session configured both through the fallback and systemd units.
+
+You can do any of the above and allow to distribute them as a standalone package for distribution.
 
 [CAUTION]
 ====
@@ -8,11 +16,6 @@ wrapper-manager-fds is considered unstable and the author is still freely experi
 Expect constant breakages here and put on a hard hat before exploring this part of the town.
 ====
 
-As a recap, the aim of wrapper-manager is to pave a way of configuring Nix environments through wrappers.
-There has been https://discourse.nixos.org/t/declarative-wrappers/1775[interest on] https://github.com/NixOS/rfcs/pull/75[this feature] footnote:[I mean, a part of the nixpkgs package set has dedicated wrappers for some packages such as GIMP, Inkscape, and Blender.] and I sometimes configure programs through wrappers instead of the typical module system.
-It has its use cases such as quickly creating variants of the same program for specific reasons (for example, creating specialized versions of yt-dlp for downloading audio, video, and more).
-But why not create something more than that?
-And that's how wrapper-manager-fds came to be.
 
 [#installation]
 == Installation
@@ -334,10 +337,10 @@ If you want to hack this hack, you'll need either Nix with flakes enabled (`expe
 Either way, this should be enough to cater to both flake- and non-flake users.
 
 This project supports the current stable and unstable version of NixOS.
-Specifically, we're looking out for the nixpkgs instance both of these versions has.
+Specifically, we're looking out for the nixpkgs instances from these branches.
 As an implementation detail, we pin these branches through https://github.com/andir/npins[npins] which both flakes- and non-flake-based setups uses.
 Just be familiar with it and you'll be fine for the most part.
-Most likely, you don't even need to interact with it since handling update cadence is handled automatically through the remote CI.
+Most likely, you don't even need to interact with it since the update cadence is handled automatically through the remote CI.
 
 Setting up the development environment should be easy enough.
 

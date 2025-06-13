@@ -3,6 +3,24 @@
 While the xref:./project-overview.adoc[] should be enough to get you started, this document contain all of the information you may need to make full use of wrapper-manager.
 
 
+[#prerequisites]
+== Prerequisites
+
+Waddling through this guide, this document works with the following assumptions:
+
+* Familiarity with the https://nixos.org/manual/nixos/stable/#sec-configuration-syntax[module system] and its conventions.
+
+* Knowledgeable in some parts of nixpkgs including https://nixos.org/manual/nixpkgs/stable/#sec-functions-library[its standard library] and builders as https://nixos.org/manual/nixpkgs/stable/#fun-makeWrapper[`makeWrapper`] and https://nixos.org/manual/nixpkgs/stable/#chap-trivial-builders[several trivial builders].
+
+* Familiarity with parts of Nix ecosystem outside of nixpkgs and NixOS.
+In particular, home-manager.
+
+* Love for spelunking source code just to understand a concept within wrapper-manager-fds. ;p footnote:[Naaaah, hopefully you'll get to do less of that as this document develops into a more comprehensive guide.]
+
+Anyways, this document won't introduce any tutorial for any of the above.
+I recommend to take a gander at the given links to get a sense of them.
+
+
 [#what-is-wrapper-manager]
 == What is wrapper-manager?
 
@@ -16,10 +34,10 @@ Speaking of which, wrapper-manager is meant to be composed in larger-scoped envi
 == Getting started
 
 But first, we'll have to have wrapper-manager in our configuration.
-There are multiple ways to do so as already shown from the xref:../project-overview#installation[Installation] so we'll go ahead with what should you do after it.
+There are multiple ways to do so as already shown from the xref:./project-overview.adoc#installation[Installation] so we'll go ahead with what should you do after it.
 There are multiple ways to build a wrapper-manager package:
 
-* You can manually build one with `wrapperManagerLib.env.build`.
+* You can manually build one with xref:./wm-lib/env.adoc#function-library-wrapperManagerLib.env.build[`wrapperManagerLib.env.build`].
 It needs a nixpkgs instance (`pkgs`) and a list of additional modules (`modules`) with an optional attrset of static of module arguments (`specialArgs`).
 +
 --
@@ -41,7 +59,7 @@ in
 ----
 --
 
-* There is also `wrapperManagerLib.env.eval` which is just evaluating a wrapper-manager package and nothing else. footnote:[In fact, `wrapperManagerLib.env.build` is just a wrapper around this function getting the toplevel package.]
+* There is also xref:./wm-lib/env.adoc#function-library-wrapperManagerLib.env.eval[`wrapperManagerLib.env.eval`] which is just evaluating a wrapper-manager package and nothing else. footnote:[In fact, `wrapperManagerLib.env.build` is just a wrapper around this function getting the toplevel package.]
 Useful for creating your own integrations in other module environments.
 It should accept the same arguments as the build function.
 
@@ -59,33 +77,7 @@ In the following code, we'll define two wrappers around github:yt-dlp/yt-dlp[opt
 .A package containing two wrapper scripts for yt-dlp
 [source, nix]
 ----
-{ lib, pkgs, ... }:
-
-{
-  wrappers.yt-dlp-audio = {
-    arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
-    prependArgs = [
-      "--no-overwrite"
-      "--extract-audio"
-      "--format" "bestaudio"
-      "--audio-format" "opus"
-      "--output" "'%(album_artists.0,artists.0)s/%(album,playlist)s/%(track_number,playlist_index)d-%(track,title)s.%(ext)s'"
-      "--download-archive" "archive"
-      "--embed-thumbnail"
-      "--add-metadata"
-    ];
-  };
-
-  # You could also lessen the code above by passing `--config-location` to
-  # yt-dlp and move them into a separate file. This is what wrapper-manager is
-  # made for, after all.
-  wrappers.yt-dlp-video = {
-    arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
-    prependArgs = [
-      "--config-location" ../../config/yt-dlp/video.conf
-    ];
-  };
-}
+include::example$configs/wrappers-for-yt-dlp.nix[tag=!*]
 ----
 
 If we build the configuration, it should result in a derivation containing two executables.
@@ -103,9 +95,9 @@ If you want to include the original yt-dlp package as part of the standalone pac
 
 [CAUTION]
 ====
-By evaluating the following code, you'll be losing metadata for the `yt-dlp` package (e.g., `version`, `meta`, `src`) since it is linked together through `symlinkJoin`.
+By evaluating the following code, you'll be losing metadata for the `yt-dlp` package (e.g., `version`, `meta`, `src`) since it is made with `buildEnv` builder.
 
-wrapper-manager also has a way to make overridden packages by passing `basePackages` with a bare package instead of a list of packages (e.g., `basePackages = pkgs.yt-dlp;` instead of `basePackages = [ pkgs.yt-dlp ];`).
+For this case, wrapper-manager has a way to make overridden packages by passing `basePackages` with a bare package instead of a list of packages (e.g., `basePackages = pkgs.yt-dlp;` instead of `basePackages = [ pkgs.yt-dlp ];`).
 This method makes it suitable to pass `programs.<name>.package` module options typically found from NixOS and home-manager but at the cost of a rebuild and may interfere with the build steps already defined from its package authors.
 ====
 
@@ -154,8 +146,8 @@ This is mainly useful for setting values within the configuration.
 ----
 
 One of the typical thing to set in a wrapper script is the environment variables.
-You could set them from xref:./wm-options.adoc#environment_variables[`environment.variables`] to set it for all of the wrappers.
-For wrapper-specific values, just go for xref:./wm-options.adoc#wrappers_name_env[`wrappers.<name>.env`].
+You could set them from xref:./wm-options.adoc#_environment_variables[`environment.variables`] to set it for all of the wrappers.
+For wrapper-specific values, just go for xref:./wm-options.adoc#_wrappers_name_env[`wrappers.<name>.env`].
 
 [source, nix]
 ----
@@ -202,7 +194,7 @@ Here's an example of creating a wrapper-manager package with a sole desktop entr
 ----
 { config, lib, pkgs, ... }: {
   xdg.desktopEntries.firefox = {
-    name = "Firefox";
+    desktopName = "Firefox";
     genericName = "Web browser";
     exec = "firefox %u";
     terminal = false;
@@ -216,7 +208,7 @@ Here's an example of creating a wrapper-manager package with a sole desktop entr
 }
 ----
 
-You could also automatically create a desktop entry for one of your wrappers by setting xref:./wm-options.adoc#wrappers_name_xdg_desktopentry_enable[`wrappers.<name>.xdg.desktopEntry.enable`] to `true` and configuring the entry with xref:./wm-options.adoc#wrappers_name_xdg_desktopentry_settings[`wrappers.<name>.xdg.desktopEntry.settings`].
+You could also automatically create a desktop entry for one of your wrappers by setting xref:./wm-options.adoc#_wrappers_name_xdg_desktopentry_enable[`wrappers.<name>.xdg.desktopEntry.enable`] to `true` and configuring the entry with xref:./wm-options.adoc#_wrappers_name_xdg_desktopentry_settings[`wrappers.<name>.xdg.desktopEntry.settings`].
 It simply sets some of those settings automatically for you such as the `Name=`, `DesktopName=`, and `Exec=` but you'll have to set the rest of it yourself for full control what's in there.
 
 [source, nix]
@@ -256,35 +248,86 @@ in {
 ----
 
 
-[#some-more-other-integrations]
-=== Some more other integrations
+[#generating-files]
+=== Generating files
 
-Being a module environment specializing on creating wrappers, there are some other integrations that you could use.
-One of them is setting arbitrary files within the output path of the derivation with xref:./wm-options.adoc#files[`files`].
-The interface should be similar to NixOS' `environment.etc` or home-manager's `home.file` module option.
+You can generate files with any content in any location within the derivation through `files` namespace.
+If you're familiar with NixOS and home-manager, you have similar option to set those files through `environment.etc.<name>` and `home.file.<name>`, respectively.
+
+.Setting files in a wrapper-manager configuraiton alongside a Neofetch wrapper
+[source, nix]
+----
+include::example$configs/neofetch-with-additional-files.nix[tag=!*]
+----
+
+One of the more common use case is generating files with a common data format such as JSON, YAML, or TOML.
+wrapper-manager-fds facilitates this through `dataFormats` namespace taking advantage of Nix-representable data formats already existing within Nix ecosystem.
+This would also allow you to set them modularly, taking full advantage of nixpkgs' module system with its merging.
+
+.Setting various configurations with `dataFormats`
+[source, nix]
+----
+include::example$configs/data-format-files.nix[tag=!*]
+----
+
+Several of the common data formats are included set with xref:./wm-options.adoc#_dataformats_enablecommonformats[`dataFormats.enableCommonFormats`].
+There are also additional data formats within the baseline wrapper-manager configuration such as systemd INI format to generate your custom systemd units and configurations but as shown in <<generating-systemd-units>>, there is a more ergonomic way to generate them.
+You can unlock them by setting xref:./wm-options.adoc#_dataformats_enableextraformats[`dataFormats.enableExtraFormats`] to `true`.
+Of course, you could also set your own data format if you wish by creating a Nix-representable data and setting `dataFormats.formats.<name>` to it.
 
 [source, nix]
 ----
-{ config, lib, ... }: {
-  files."etc/xdg/custom-application".text = ''
-    HELLO=WORLD
-    LOCATION=Inside of your house
-  '';
+{ pkgs, lib, ... }:
 
-  # Just take note any files in `$out/bin` will be overridden by the wrappers
-  # if they have the same name.
-  files."bin/what" = {
-    text = "echo WHAT $@";
-    mode = "0755";
-  };
-
-  files."share/example".source = ./docs/example;
+{
+  dataFormats.formats.lua = pkgs.formats.lua { };
+  dataFormats.formats.djangoVars = pkgs.formats.pythonVars { };
+  dataFormats.formats.xml = pkgs.formats.xml { };
 }
 ----
 
-One of them is the setting the locale archive which is practically required for every Nix-built applications.
-To enable them, you'll have to set xref:./wm-options.adoc#locale_enable[`locale.enable`] to `true` to set it for all wrappers but you can specifically set them with xref:./wm-options.adoc#wrappers_name_locale_enable[`wrappers.<name>.locale.enable`].
-You could also change the locale archive package with xref:./wm-options.adoc#locale_package[`locale.package`].
+
+[#generating-systemd-units]
+=== Generating systemd units
+
+wrapper-manager-fds has a large module set for generating systemd units at `programs.systemd` namespace.
+This is useful for integrating this into module environments such as NixOS.
+
+.A lightly comprehensive example of systemd units
+[source, nix]
+----
+include::example$configs/systemd-units.nix[tag=!*]
+----
+
+For astute readers, this is actually the same options found from NixOS' systemd module.
+This is because it uses a forked version from NixOS' systemd library and inherited the same options.
+If you're familiar with it, you're halfway there but this version does have its differences from the original version:
+
+* Individually enabling units has been removed (i.e., `systemd.user.units.<name>.enable`).
+
+* Stateless installation is disabled and has to be enabled through `programs.systemd.enableStatelessInstallation` and their unit-specific version of the same option.
+
+* Generating drop-in units is supported out-of-the-box through specifying the unit filename as `$UNITNAME/$DROPIN` where it will be generated as `$UNIT_NAME.$UNIT_TYPE/$DROP_IN_NAME.conf`.
++
+For example, `programs.systemd.system.services."nix-daemon/10-basic-overrides"` generates `$out/etc/systemd/system/nix-daemon.service.d/10-basic-overrides.conf` in the final derivation.
++
+As a consequence, the equivalent of `overridesStrategy` from NixOS' version has been removed.
+
+* There is a dedicated settings options in each unit (e.g., `programs.systemd.user.<name>.settings`).
+Though, in practice, you may not use it since most of the options handle that for you.
+
+Like from the NixOS' version, there is an option for generating either for system and user-specific units.
+It will be generated in `$out/etc/system/$VARIANT`.
+
+
+[#setting-locale-data]
+=== Setting locale data
+
+One of the little things to be set for Nix-built applications are setting up locale data.
+If set improperly, it would use locale data in the host system instead from nixpkgs. footnote:[Not exactly the end of the world as it can still run but it's just incorrect.]
+
+To enable them, you'll have to set xref:./wm-options.adoc#_locale_enable[`locale.enable`] to `true` to set it for all wrappers but you can specifically set them with xref:./wm-options.adoc#_wrappers_name_locale_enable[`wrappers.<name>.locale.enable`].
+You could also change the locale archive package with xref:./wm-options.adoc#_locale_package[`locale.package`].
 
 
 [#as-a-standalone-package]
@@ -375,34 +418,7 @@ Any wrapper-manager packages declared through it are automatically added as part
 
 [source, nix]
 ----
-{ lib, config, ... }:
-
-{
-  wrapper-manager.packages.writing.imports = [
-    ../configs/wrapper-manager/writing
-  ];
-
-  wrapper-manager.packages.music-setup = {
-    wrappers.beets = {
-      arg0 = lib.getExe' pkgs.beets "beet";
-      prependArgs = [ "--config" ./config/beets/config.yml ];
-    };
-  };
-
-  wrapper-manager.packages.archive-setup = { lib, pkgs, ... }: {
-    wrappers.gallery-dl = {
-      arg0 = lib.getExe' pkgs.gallery-dl "gallery-dl";
-      prependArgs = [ ];
-    };
-
-    wrappers.yt-dlp-audio = {
-      arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
-      prependArgs = [
-        "--config-location" ./configs/yt-dlp/audio.conf
-      ];
-    };
-  };
-}
+include::example$configs/wider-scoped-environment/nixos-example.nix[tag=!*]
 ----
 
 Aside from an easy way to create wrappers instead of manually invoking the building function from wrapper-manager, there's also another nicety with the integration module.
