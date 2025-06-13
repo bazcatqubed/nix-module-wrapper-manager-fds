@@ -318,6 +318,10 @@ in
     programs.systemd.system.units = collectSystemdUnits cfg.system;
     programs.systemd.user.units = collectSystemdUnits cfg.user;
 
+    dataFormats.formats = lib.mkIf config.dataFormats.enableExtraFormats {
+      systemdIni = wrapperManagerLib.formats.systemdIni { };
+    };
+
     files = lib.mkMerge [
       (lib.mkIf (cfg.system.units != { }) {
         "/etc/systemd/system".source = wrapperManagerLib.systemd.generateUnits { inherit (cfg.system) units; };
