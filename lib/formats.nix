@@ -36,7 +36,9 @@ rec {
 
         atomUnit' = either atomUnit (listOf atomUnit);
 
-        sectionUnit = (attrsOf atomUnit');
+        sectionUnit = (attrsOf atomUnit') // {
+          description = "systemd INI section";
+        };
       in
         attrsOf (either sectionUnit (listOf sectionUnit));
 
