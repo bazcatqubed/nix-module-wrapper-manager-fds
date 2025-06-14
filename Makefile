@@ -1,6 +1,6 @@
 .PHONY: docs-serve
 docs-serve:
-	hugo -s docs/website serve
+	inotifywait --monitor --event modify --recursive docs/website --exclude "node_modules" | while read -r path action file; do antora generate site.yml; done
 
 .PHONY: docs-build
 docs-build:
