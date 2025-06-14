@@ -19,10 +19,12 @@ in
   xdg-basedirs = build { modules = [ ./xdg-basedirs.nix ]; };
   single-basepackage = build { modules = [ ./single-basepackage.nix ]; };
   neofetch-with-additional-files = build { modules = [ ./neofetch-with-additional-files.nix ]; };
-  lib-modules-make-wraparound = build { modules = [ ./lib-modules-subset/make-wraparound.nix ]; };
   systemd-units = build { modules = [ ./systemd-units.nix ]; };
   wrappers-with-systemd-units = build { modules = [ ./wrappers-with-systemd-enabled.nix ]; };
   data-format-files = build { modules = [ ./data-format-files.nix ]; };
-  systemd-lib-module-test = build { modules = [ ./systemd-lib-module-test.nix ]; };
   gnome-session-basic-example = build { modules = [ ./gnome-session-basic-example.nix ]; };
+
+  # Testing out from the library set that needs the module environment.
+  lib-modules-make-wraparound = build { modules = [ ./lib-modules-subset/make-wraparound.nix ]; };
+  systemd-lib-module-test = build { modules = [ ./lib-modules-subset/systemd-lib-module-test.nix ]; };
 }
