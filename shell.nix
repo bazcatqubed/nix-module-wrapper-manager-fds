@@ -22,7 +22,12 @@ pkgs.mkShell {
     nodejs
     nodePackages.prettier
     vscode-langservers-extracted
+    (vale.withStyles (p: with p; [
+      proselint
+      readability
+    ]))
     vale-ls
+    asciidoctor-with-extensions
 
     npins
     treefmt
