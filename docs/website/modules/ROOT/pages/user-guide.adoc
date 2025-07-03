@@ -384,7 +384,7 @@ Here's an example of importing it into a NixOS and home-manager config with flak
 ----
 {
   # ...
-  inputs.wrapper-manager.url = "github:foo-dogsquared/nix-module-wrapper-manager-fds";
+  inputs.wrapper-manager.url = "github:bazcatqubed/nix-module-wrapper-manager-fds";
 
   outputs = inputs:
     let

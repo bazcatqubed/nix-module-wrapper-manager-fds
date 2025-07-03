@@ -7,8 +7,8 @@ asciidoc:
     env-antora: true
     current-version: 0.1.0
     github-repo: nix-module-wrapper-manager-fds
-    github-full: foo-dogsquared/{github-repo}
+    github-full: bazcatqubed/{github-repo}
     remote-git-repo: https://github.com/{github-full}
-    docs-site: https://foo-dogsquared.github.io/{github-repo}
+    docs-site: https://bazcatqubed.github.io/{github-repo}
 nav:
   - modules/ROOT/nav.adoc

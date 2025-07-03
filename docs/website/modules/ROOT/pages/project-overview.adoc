@@ -43,7 +43,7 @@ Assuming you have already initialized npins, you can simply add wrapper-manager-
 
 [source, shell, subs="attributes+"]
 ----
-npins add --name wrapper-manager github foo-dogsquared {github-repo} --at {current-version}
+npins add --name wrapper-manager github bazcatqubed {github-repo} --at {current-version}
 ----
 
 Similar to channels installation, you'll have to import the <<user-entrypoint>> object.
