@@ -8,14 +8,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/foo-dogsquared/nix-module-wrapper-manager-fds.git"
+    "url": "git+https://github.com/bazcatqubed/nix-module-wrapper-manager-fds.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/foo-dogsquared/nix-module-wrapper-manager-fds/issues"
+    "url": "https://github.com/bazcatqubed/nix-module-wrapper-manager-fds/issues"
   },
-  "homepage": "https://github.com/foo-dogsquared/nix-module-wrapper-manager-fds#readme",
+  "homepage": "https://github.com/bazcatqubed/nix-module-wrapper-manager-fds#readme",
   "dependencies": {
     "@antora/cli": "^3.1.10",
     "@antora/site-generator": "^3.1.10"

@@ -47,7 +47,7 @@ let
             declarations = map (
               decl:
               if lib.hasPrefix src (toString decl) then
-                gitHubDeclaration "foo-dogsquared" "nix-module-wrapper-manager-fds" (
+                gitHubDeclaration "bazcatqubed" "nix-module-wrapper-manager-fds" (
                   lib.removePrefix "/" (lib.removePrefix src (toString decl))
                 )
               else if decl == "lib/modules.nix" then
