@@ -8,6 +8,7 @@
         "repo": "home-manager"
       },
       "branch": "release-24.05",
+      "submodules": false,
       "revision": "2f23fa308a7c067e52dfcc30a0758f47043ec176",
       "url": "https://github.com/nix-community/home-manager/archive/2f23fa308a7c067e52dfcc30a0758f47043ec176.tar.gz",
       "hash": "00wp0s9b5nm5rsbwpc1wzfrkyxxmqjwsc1kcibjdbfkh69arcpsn"
@@ -20,9 +21,10 @@
         "repo": "home-manager"
       },
       "branch": "master",
-      "revision": "5675a9686851d9626560052a032c4e14e533c1fa",
-      "url": "https://github.com/nix-community/home-manager/archive/5675a9686851d9626560052a032c4e14e533c1fa.tar.gz",
-      "hash": "0d4ssvcjf1n2x1lyk181mcxr9zrn7b5qv9yn2vxyk9qxnrnc2jz6"
+      "submodules": false,
+      "revision": "e8c19a3cec2814c754f031ab3ae7316b64da085b",
+      "url": "https://github.com/nix-community/home-manager/archive/e8c19a3cec2814c754f031ab3ae7316b64da085b.tar.gz",
+      "hash": "0k7sa69yqdizk3yxjlsyrzm86lwzpimxhjygxdp98hqd3hg2dv2b"
     },
     "nixos-stable": {
       "type": "Git",
@@ -32,6 +34,7 @@
         "repo": "nixpkgs"
       },
       "branch": "nixos-24.05",
+      "submodules": false,
       "revision": "b134951a4c9f3c995fd7be05f3243f8ecd65d798",
       "url": "https://github.com/NixOS/nixpkgs/archive/b134951a4c9f3c995fd7be05f3243f8ecd65d798.tar.gz",
       "hash": "0zydsqiaz8qi4zd63zsb2gij2p614cgkcaisnk11wjy3nmiq0x1s"
@@ -44,9 +47,10 @@
         "repo": "nixpkgs"
       },
       "branch": "nixos-unstable",
-      "revision": "96ec055edbe5ee227f28cdbc3f1ddf1df5965102",
-      "url": "https://github.com/NixOS/nixpkgs/archive/96ec055edbe5ee227f28cdbc3f1ddf1df5965102.tar.gz",
-      "hash": "064q32jmj54iwgh4lcdg2aii75cr5lvb683ym5pmj2kkj340pnpd"
+      "submodules": false,
+      "revision": "62e0f05ede1da0d54515d4ea8ce9c733f12d9f08",
+      "url": "https://github.com/NixOS/nixpkgs/archive/62e0f05ede1da0d54515d4ea8ce9c733f12d9f08.tar.gz",
+      "hash": "1q04m02cghivl6wvh65qpyjqv09dqm7lq5qbq3v9s6lwwfdinx14"
     },
     "website": {
       "type": "Git",
@@ -56,10 +60,11 @@
         "repo": "website"
       },
       "branch": "master",
-      "revision": "45812d5f6554a72a3b499e878d291f0215343c0b",
-      "url": "https://github.com/foo-dogsquared/website/archive/45812d5f6554a72a3b499e878d291f0215343c0b.tar.gz",
-      "hash": "1z842r09m1zxi40rnbfvldis9rqw2i4q7gcxvmbahyglr5fzfq3l"
+      "submodules": false,
+      "revision": "66f3227a8c7ff6d57ef6ab4e8354f09be499ef4d",
+      "url": "https://github.com/foo-dogsquared/website/archive/66f3227a8c7ff6d57ef6ab4e8354f09be499ef4d.tar.gz",
+      "hash": "0y2yzjq9cwrq44g8iay809vgja47r4n49s46cijdql4nvn0hl6ga"
     }
   },
-  "version": 3
+  "version": 5
 }
