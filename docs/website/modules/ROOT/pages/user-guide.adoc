@@ -6,7 +6,7 @@ While the xref:./project-overview.adoc[] should be enough to get you started, th
 [#prerequisites]
 == Prerequisites
 
-Waddling through this guide, this document works with the following assumptions:
+While skimming through this guide, this document works with the following assumptions:
 
 * Familiarity with the https://nixos.org/manual/nixos/stable/#sec-configuration-syntax[module system] and its conventions.
 
@@ -25,9 +25,25 @@ I recommend to take a gander at the given links to get a sense of them.
 == What is wrapper-manager?
 
 Simply put, this is a declarative interface built on top of https://nixos.org/manual/nixpkgs/stable/#fun-makeWrapper[`makeWrapper` and company] plus some other integrations as we'll explore in this document.
+Under the hood, the declarative interface is implemented with the https://nixos.org/manual/nixos/stable/#sec-configuration-syntax[same module system as NixOS' configuration system] which is used by other Nix environments such as home-manager.
+Once you're familiar with NixOS, you're halfway there in knowing wrapper-manager, the difference being the different options and all.
 
 It is comparable to NixOS and home-manager in a way that it compiles into an operating system and a home environment respectively, wrapper-manager compiles the module environment into a package.
 Speaking of which, wrapper-manager is meant to be composed in larger-scoped environments such as NixOS and home-manager, mainly by including wrapper-manager packages in `environment.systemPackages` and `home.packages` but you could also make them as a standalone package.
+
+
+[#why-use-wrapper-manager]
+=== Why use this anyways?
+
+* Possibility to create multiple variants of the same program.
+Most of the time, the program may have ways to manage their configuration in limiting ways (e.g., only allowing one program configuration at a time stored in an arbitrary location).
+wrapper-manager allows you to work around those limitations.
+
+* Packaging those configurations and variants in a standalone manner.
+wrapper-manager having an output of a package made it possible to create standalone versions of program variants and various files to be composed in an environment such as a devshell, in a NixOS or home-manager system, and the like.
+
+* Integration with the rest of the NixOS (and home-manager) ecosystem.
+This project was created with integrating with those environments in mind with ergonomic ways to create various things such as XDG desktop entries and systemd units.
 
 
 [#getting-started]
@@ -428,7 +444,7 @@ This is useful for dynamic and conditional configurations with the wider-scoped 
 Additionally, with  documentation packages alongside the environment similar to NixOS and home-manager.
 
 * There is a manpage which you can install by setting `wrapper-manager.documentation.manpage.enable` to `true`.
-It is available to be viewed as `wrapper-manager.nix(5)` (i.e., `man 5 wrapper-manager.nix`).
+It is available to be viewed as `wrapper-manager-configuration.nix(5)` (i.e., `man 5 wrapper-manager-configuration.nix`).
 
 * An HTML manual can be brought over by setting `wrapper-manager.documentation.html.enable` to `true`.
 The HTML manual package has a desktop entry file titled `wrapper-manager manual` in the common application launchers (e.g., rofi, GNOME Shell app launcher).
