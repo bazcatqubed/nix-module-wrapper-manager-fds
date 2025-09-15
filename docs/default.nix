@@ -164,7 +164,7 @@ in
 
         uiBundle = pkgs.fetchurl {
           url = "https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable";
-          hash = "sha256-tRjFlXjFJZFKQaedakUJpRdtRafbhQGpRvQ+15TzKKA=";
+          hash = "sha256-mzGAF8JFad1PVmyjSFx6IGQ4SK/LxWpHrsBgA8XHa+I=";
         };
       });
 
