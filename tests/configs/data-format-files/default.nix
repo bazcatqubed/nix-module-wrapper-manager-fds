@@ -1,9 +1,16 @@
 { config, lib, pkgs, ... }:
 
 {
+  imports = [
+    ./other-parts.nix
+  ];
+
   dataFormats.files."/etc/app/config.json" = {
     variant = "json";
     content = {
+      allowAll = true;
+      startGreeting = true;
+
       words.allowlist = [
         "Why,"
         "Hello"
@@ -26,6 +33,7 @@
     content = lib.mkMerge [
       {
         health = 1.0000;
+        race = "human";
         battle.skills = [
           "Fireball"
           "Pocket sand"
