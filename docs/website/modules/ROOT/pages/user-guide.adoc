@@ -45,6 +45,21 @@ wrapper-manager having an output of a package made it possible to create standal
 * Integration with the rest of the NixOS (and home-manager) ecosystem.
 This project was created with integrating with those environments in mind with ergonomic ways to create various things such as XDG desktop entries and systemd units.
 
+* Unlike the original version, this is primarily used for creating wrappers for shadowing an executable. footnote:[Though, this project does facilitate easily creating a package for desktop usage (e.g., XDG desktop entries).]
+
+
+[#why-not-use-wrapper-manager]
+=== What wrapper-manager won't be
+
+While wrapper-manager uses the same module system as NixOS and home-manager, there are some boundaries this project won't cross.
+
+* The ecosystem wrapper-manager builds will not facilitate building larger-than-typical-packages, specifically https://nix.dev/manual/nix/2.25/package-management/profiles[Nix profiles] which is what NixOS and home-manager builds. footnote:[Even if one could make the argument that NixOS and home-manager outputs can be treated the same as any other packages, it is easy to "scope creep" this into oblivion.]
+
+* There won't be any focus on application configuration especially on desktop ecosystem where it typically relies on other programs, even their configuration (e.g., GNOME apps relying on GSettings [and dconf], KDE applications persisting on locations with cascading configuration system).
+This includes something like a configurative design system such as https://github.com/nix-community/stylix[stylix] or https://github.com/tinted-theming/[Tinted Theming].
+
+* Service management is out of the question so there's no `services` namespace similarly found in NixOS and home-manager. footnote:[We could support modular services though if there's suitable design for them [e.g., generating simple scripts for them].]
+
 
 [#getting-started]
 == Getting started
@@ -283,7 +298,7 @@ This would also allow you to set them modularly, taking full advantage of nixpkg
 .Setting various configurations with `dataFormats`
 [source, nix]
 ----
-include::example$configs/data-format-files.nix[tag=!*]
+include::example$configs/data-format-files/default.nix[tag=!*]
 ----
 
 Several of the common data formats are included set with xref:./wm-options.adoc#_dataformats_enablecommonformats[`dataFormats.enableCommonFormats`].
