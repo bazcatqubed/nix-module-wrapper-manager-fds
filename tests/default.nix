@@ -9,9 +9,9 @@ let
   wrapperManagerLibTests = import ./lib { inherit pkgs; };
   inherit (pkgs) lib;
 
+  configs' = import ./configs { inherit pkgs; };
   configs =
     let
-      configs' = import ./configs { inherit pkgs; };
       updateTestName =
         configName: package:
         lib.mapAttrs' (n: v: lib.nameValuePair "${configName}-${n}" v) package.wrapperManagerTests;
@@ -19,9 +19,7 @@ let
     lib.concatMapAttrs updateTestName configs';
 in
 {
-  inherit configs;
-
-  _configs = configs;
+  inherit configs configs';
 
   lib =
     pkgs.runCommand "wrapper-manager-fds-lib-test"
