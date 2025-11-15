@@ -22,9 +22,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "4ac96eb21c101a3e5b77ba105febc5641a8959aa",
-      "url": "https://github.com/nix-community/home-manager/archive/4ac96eb21c101a3e5b77ba105febc5641a8959aa.tar.gz",
-      "hash": "05gvg4m841biv0gi1c52q34ra2r68vvz3b2hcy2kdcz0j655l94l"
+      "revision": "827f2a23373a774a8805f84ca5344654c31f354b",
+      "url": "https://github.com/nix-community/home-manager/archive/827f2a23373a774a8805f84ca5344654c31f354b.tar.gz",
+      "hash": "18r687m153vzr2j98zjlhnjhkyb4i5jfkqiqbiysx3f0xzqcv0a5"
     },
     "nixos-stable": {
       "type": "Git",
@@ -35,9 +35,9 @@
       },
       "branch": "nixos-25.05",
       "submodules": false,
-      "revision": "daf6dc47aa4b44791372d6139ab7b25269184d55",
-      "url": "https://github.com/NixOS/nixpkgs/archive/daf6dc47aa4b44791372d6139ab7b25269184d55.tar.gz",
-      "hash": "0ddhdypgkg4cs5zy7y5wjl62y8nrfx7xh6b95l4rkbpnl2xzn5f3"
+      "revision": "3acb677ea67d4c6218f33de0db0955f116b7588c",
+      "url": "https://github.com/NixOS/nixpkgs/archive/3acb677ea67d4c6218f33de0db0955f116b7588c.tar.gz",
+      "hash": "0bz1qwd1fw9v4hmxi6h2qfgvxpv4kwdiz7xd9p7j1msr0b8d54h3"
     },
     "nixos-unstable": {
       "type": "Git",
@@ -48,9 +48,9 @@
       },
       "branch": "nixos-unstable",
       "submodules": false,
-      "revision": "08dacfca559e1d7da38f3cf05f1f45ee9bfd213c",
-      "url": "https://github.com/NixOS/nixpkgs/archive/08dacfca559e1d7da38f3cf05f1f45ee9bfd213c.tar.gz",
-      "hash": "0wlih99mcqsllsqnxcjvacb42bbxl0jzasn6c3i0xvjb6bf8blm3"
+      "revision": "c5ae371f1a6a7fd27823bc500d9390b38c05fa55",
+      "url": "https://github.com/NixOS/nixpkgs/archive/c5ae371f1a6a7fd27823bc500d9390b38c05fa55.tar.gz",
+      "hash": "18g0f8cb9m8mxnz9cf48sks0hib79b282iajl2nysyszph993yp0"
     },
     "website": {
       "type": "Git",
@@ -61,9 +61,9 @@
       },
       "branch": "master",
       "submodules": false,
-      "revision": "1b8cd5fea979706791efea58a1d7fe9885f5a6d3",
-      "url": "https://github.com/foo-dogsquared/website/archive/1b8cd5fea979706791efea58a1d7fe9885f5a6d3.tar.gz",
-      "hash": "1ijis2djkypjpmbpzgvvsv9swr6kqy8a40p6f12ykgwbf99fcx1m"
+      "revision": "77d35d3a2aba99351ac746d166d03fe124174318",
+      "url": "https://github.com/foo-dogsquared/website/archive/77d35d3a2aba99351ac746d166d03fe124174318.tar.gz",
+      "hash": "054w9fkfpj8hd6nh16qzfvqncy5qyhp3yb84m4f9hm1xnylp2y50"
     }
   },
   "version": 5
