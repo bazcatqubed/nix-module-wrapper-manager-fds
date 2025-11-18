@@ -1,0 +1,13 @@
+= wrapper-manager-{nix-module-env}-configuration(5)
+:doctype: manpage
+:mantitle: WRAPPER-MANAGER-{nix-module-env-all-caps}-CONFIGURATION.NIX(5)
+:manmanual: wrapper-manager configuration for {nix-module-env}
+:mansource: wrapper-manager configuration for {nix-module-env}
+:man-linkstyle: pass:[blue R < >]
+
+
+== Name
+
+wrapper-manager-{nix-module-env}-configuration.nix - wrapper-manager configuration specification for {nix-module-env-formal-name}
+
+== Options

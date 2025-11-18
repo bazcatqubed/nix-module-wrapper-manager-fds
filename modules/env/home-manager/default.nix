@@ -18,7 +18,10 @@ in
   config = lib.mkMerge [
     {
       home.packages =
-        lib.optionals cfg.documentation.manpage.enable [ wmDocs.outputs.manpage ]
+        lib.optionals cfg.documentation.manpage.enable [
+          wmDocs.outputs.manpage
+          wmDocs.outputs.manpageCommonEnv.home-manager
+        ]
         ++ lib.optionals cfg.documentation.html.enable [ wmDocs.outputs.html ];
 
       wrapper-manager.extraSpecialArgs.hmConfig = config;

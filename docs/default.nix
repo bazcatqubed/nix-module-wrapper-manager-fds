@@ -190,6 +190,57 @@ in
             $out/share/man/man5/wrapper-manager-configuration.nix.5
         '';
 
+    # Take note we'll build all of the supported wider-scoped environments in
+    # one derivation and we'll just override it with a `postBuild` in case
+    # we need to modify it.
+    manpageCommonEnv = let
+      makeOptionsManpage = {
+        envName,
+        optionsDoc,
+        envNameAllCaps ? lib.strings.toUpper envName,
+        envFormalName ? envName,
+        manpageName ? "wrapper-manager-${envName}-configuration"
+      }:
+        ''
+          asciidoctor --attribute nix-module-env=${envName} --attribute nix-module-env-all-caps=${envNameAllCaps} \
+            --attribute nix-module-env-formal-name=${envFormalName} --backend manpage \
+            ${./manpages/header-common-env.adoc} --out-file header-nixos.5
+          nixos-render-docs options manpage --revision ${releaseConfig.version} \
+            --header ./header-nixos.5 --footer ${./manpages/footer.5} \
+            ${optionsDoc.optionsJSON}/share/doc/nixos/options.json \
+            $out/share/man/man5/${manpageName}.nix.5
+        '';
+
+      makeManpageDrv = manpageGenerationOptions:
+        pkgs.runCommand "wrapper-manager-common-env-manpage"
+          {
+            nativeBuildInputs = with pkgs; [
+              nixos-render-docs
+              asciidoctor-with-extensions
+            ];
+          }
+          ''
+            mkdir -p $out/share/man/man5
+
+            ${makeOptionsManpage manpageGenerationOptions}
+          '';
+    in
+      {
+        nixos = makeManpageDrv {
+          envName = "nixos";
+          envNameAllCaps = "NIXOS";
+          envFormalName = "NixOS";
+          optionsDoc = wmNixosDoc;
+        };
+
+        home-manager = makeManpageDrv {
+          envName = "home-manager";
+          envNameAllCaps = "HOME-MANAGER";
+          optionsDoc = wmHmDoc;
+          manpageName = "wrapper-manager-home-configuration";
+        };
+      };
+
     html =
       pkgs.runCommand "wrapper-manager-reference-html"
         {

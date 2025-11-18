@@ -25,7 +25,10 @@ in
   config = lib.mkMerge [
     {
       environment.systemPackages =
-        lib.optionals cfg.documentation.manpage.enable [ wmDocs.outputs.manpage ]
+        lib.optionals cfg.documentation.manpage.enable [
+          wmDocs.outputs.manpage
+          wmDocs.outputs.manpageCommonEnv.nixos
+        ]
         ++ lib.optionals cfg.documentation.html.enable [ wmDocs.outputs.html ];
 
       wrapper-manager.extraSpecialArgs.nixosConfig = config;
