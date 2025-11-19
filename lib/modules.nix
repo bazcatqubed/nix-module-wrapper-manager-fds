@@ -104,8 +104,23 @@ rec {
     # Examples
 
     ```nix
-    mkWraparoundBefore wraparoundArgs ++ [ "--" ] ++ [ (lib.getExe pkgs.hello) ]
+    mkWraparoundBefore (wraparoundArgs ++ [ "--" ] ++ [ (lib.getExe pkgs.hello) ])
     ```
   */
   mkWraparoundBefore = lib.mkOrder 250;
+
+  /**
+    Create an override value that is associated with wraparound values.
+
+    # Arguments
+
+    Same as nixpkgs' `lib.mkForce`.
+
+    # Examples
+
+    ```nix
+    mkWraparoundOverride "HELLO"
+    ```
+  */
+  mkWraparoundOverride = lib.mkOverride 40;
 }

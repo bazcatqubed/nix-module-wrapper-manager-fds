@@ -11,5 +11,6 @@
 
     ./programs/systemd
     ./programs/gnome-session
+    ./wraparound
   ];
 }
