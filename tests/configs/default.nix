@@ -25,6 +25,7 @@ in
   wrappers-for-yt-dlp = build { modules = [ ./wrappers-for-yt-dlp.nix ]; };
   data-format-files = build { modules = [ ./data-format-files ]; };
   gnome-session-basic-example = build { modules = [ ./gnome-session-basic-example.nix ]; };
+  multiple-outputs = build { modules = [ ./multiple-outputs.nix ]; };
 
   # Testing out from the library set that needs the module environment.
   lib-modules-make-wraparound = build { modules = [ ./lib-modules-subset/make-wraparound.nix ]; };

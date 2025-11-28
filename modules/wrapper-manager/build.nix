@@ -42,6 +42,29 @@
       example = "shell";
     };
 
+    outputs = lib.mkOption {
+      type = with lib.types; listOf str;
+      description = ''
+        List of outputs for the derivation.
+      '';
+      default =
+        if lib.isList config.basePackages then config.basePackages.output else [ "out" ];
+      example = [ "out" "configs" ];
+    };
+
+    overrideAttrs = lib.mkOption {
+      type = with lib.types; functionTo (functionTo attrsOf anything);
+      default = _: _: { };
+      description = ''
+        Additional set of attributes to be overriden through `overrideAttrs` for the derivation.
+      '';
+      example = lib.literalExpression ''
+        finalAttrs: prevAttrs: {
+          outputs = [ "out" "configs" ];
+        }
+      '';
+    };
+
     extraSetup = lib.mkOption {
       type = lib.types.lines;
       description = ''
@@ -103,54 +126,57 @@
           mkDesktopEntries = desktopEntries: builtins.map (entry: pkgs.makeDesktopItem entry) desktopEntries;
 
           desktopEntries = mkDesktopEntries (lib.attrValues config.xdg.desktopEntries);
-        in
-        if lib.isList config.basePackages then
-          pkgs.buildEnv {
-            passthru = config.build.extraPassthru;
-            meta = config.build.extraMeta;
-            name = config.build.drvName;
-            paths = desktopEntries ++ config.basePackages;
-            nativeBuildInputs =
-              if variant == "binary" then
-                [ pkgs.makeBinaryWrapper ]
-              else if variant == "shell" then
-                [ pkgs.makeShellWrapper ]
-              else
-                [ ];
-            postBuild = ''
-              ${config.build.extraSetup}
-              ${mkWrapBuild (lib.attrValues config.wrappers)}
-            '';
-          }
-        else
-          config.basePackages.overrideAttrs (
-            final: prev: {
-              name = config.build.drvName;
-              nativeBuildInputs =
-                (prev.nativeBuildInputs or [ ])
-                ++ (
+
+          package =
+            if lib.isList config.basePackages then
+              pkgs.buildEnv {
+                passthru = config.build.extraPassthru;
+                meta = config.build.extraMeta;
+                name = config.build.drvName;
+                paths = desktopEntries ++ config.basePackages;
+                nativeBuildInputs =
                   if variant == "binary" then
                     [ pkgs.makeBinaryWrapper ]
                   else if variant == "shell" then
                     [ pkgs.makeShellWrapper ]
                   else
-                    [ ]
-                )
-                ++ lib.optionals (config.xdg.desktopEntries != { }) [ pkgs.copyDesktopItems ];
-              desktopItems = (prev.desktopItems or [ ]) ++ desktopEntries;
-              postFixup = ''
-                ${prev.postFixup or ""}
-                ${mkWrapBuild (lib.attrValues config.wrappers)}
-              '';
-              passthru = lib.recursiveUpdate (prev.passthru or { }) (
-                config.build.extraPassthru
-                // {
-                  unwrapped = config.basePackages;
+                    [ ];
+                postBuild = ''
+                  ${config.build.extraSetup}
+                  ${mkWrapBuild (lib.attrValues config.wrappers)}
+                '';
+              }
+            else
+              config.basePackages.overrideAttrs (
+                final: prev: {
+                  name = config.build.drvName;
+                  nativeBuildInputs =
+                    (prev.nativeBuildInputs or [ ])
+                    ++ (
+                      if variant == "binary" then
+                        [ pkgs.makeBinaryWrapper ]
+                      else if variant == "shell" then
+                        [ pkgs.makeShellWrapper ]
+                      else
+                        [ ]
+                    )
+                    ++ lib.optionals (config.xdg.desktopEntries != { }) [ pkgs.copyDesktopItems ];
+                  desktopItems = (prev.desktopItems or [ ]) ++ desktopEntries;
+                  postFixup = ''
+                    ${prev.postFixup or ""}
+                    ${mkWrapBuild (lib.attrValues config.wrappers)}
+                  '';
+                  passthru = lib.recursiveUpdate (prev.passthru or { }) (
+                    config.build.extraPassthru
+                    // {
+                      unwrapped = config.basePackages;
+                    }
+                  );
+                  meta = lib.recursiveUpdate (prev.meta or { }) config.build.extraMeta;
                 }
               );
-              meta = lib.recursiveUpdate (prev.meta or { }) config.build.extraMeta;
-            }
-          );
+        in
+          package.overrideAttrs config.build.overrideAttrs;
     };
   };
 }
