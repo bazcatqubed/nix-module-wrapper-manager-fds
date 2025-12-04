@@ -48,12 +48,12 @@
         List of outputs for the derivation.
       '';
       default =
-        if lib.isList config.basePackages then config.basePackages.output else [ "out" ];
+        if lib.isList config.basePackages then config.basePackages.outputs else [ "out" ];
       example = [ "out" "configs" ];
     };
 
     overrideAttrs = lib.mkOption {
-      type = with lib.types; functionTo (functionTo attrsOf anything);
+      type = with lib.types; functionTo (functionTo (attrsOf anything));
       default = _: _: { };
       description = ''
         Additional set of attributes to be overriden through `overrideAttrs` for the derivation.

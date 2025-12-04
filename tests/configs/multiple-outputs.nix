@@ -5,10 +5,12 @@
   '';
 
   build.extraSetup = ''
-    touch $configs/hello-there && echo "This is just a text in configs output path." | tee $configs/hello-there
+    echo "This is just a text in configs output path." >> "$configs/hello-there"
   '';
 
-  build.extraPassthru.outputs = [ "out" "configs" ];
+  build.overrideAttrs = _: _: {
+    outputs = [ "out" "configs" ];
+  };
 
   # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
