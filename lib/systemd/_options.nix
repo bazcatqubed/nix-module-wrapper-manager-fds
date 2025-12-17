@@ -66,6 +66,14 @@ rec {
   # This is a baseline option set for the unit which is shared by ALL systemd
   # unit modules.
   sharedOptions = {
+    enable = lib.mkEnableOption null // {
+      default = true;
+      description = ''
+        Whether to enable generation of the systemd unit in the final
+        derivation.
+      '';
+    };
+
     name = lib.mkOption {
       type = lib.types.str;
       description = ''

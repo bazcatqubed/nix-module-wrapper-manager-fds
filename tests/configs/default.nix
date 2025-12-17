@@ -21,6 +21,7 @@ in
   neofetch-with-additional-files = build { modules = [ ./neofetch-with-additional-files.nix ]; };
   systemd-units = build { modules = [ ./systemd-units.nix ]; };
   systemd-unit-data-format-files = build { modules = [ ./systemd-unit-data-format-files.nix ]; };
+  systemd-unit-with-empty-value = build { modules = [ ./systemd-unit-with-empty-value.nix ]; };
   wrappers-with-systemd-units = build { modules = [ ./wrappers-with-systemd-enabled.nix ]; };
   wrappers-for-yt-dlp = build { modules = [ ./wrappers-for-yt-dlp.nix ]; };
   data-format-files = build { modules = [ ./data-format-files ]; };

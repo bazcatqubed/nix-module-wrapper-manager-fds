@@ -47,6 +47,7 @@ rec {
   */
   intoUnit = def: {
     inherit (def)
+      enable
       name
       enableStatelessInstallation
       filename
@@ -95,7 +96,7 @@ rec {
     pkgs.buildEnv {
       ignoreCollisions = false;
       name = "wrapper-manager-systemd-generated-units";
-      paths = lib.mapAttrsToList (_: v: v.unit) units;
+      paths = lib.mapAttrsToList (_: v: v.unit) (lib.filterAttrs (_: v: v.enable) units);
     };
 
   options = import ./_options.nix { inherit pkgs lib self; };
