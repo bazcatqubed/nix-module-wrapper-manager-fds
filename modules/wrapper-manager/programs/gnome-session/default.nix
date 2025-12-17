@@ -148,7 +148,19 @@ in
         }
       '';
       type = with lib.types; attrsOf (submoduleWith {
-        modules = [ ./submodules/session-type.nix ];
+        modules = [
+          ./submodules/session-type.nix
+
+          ({ lib, ... }: {
+            options.enable = lib.mkEnableOption null // {
+              default = true;
+              description = ''
+                Whether to enable generating the files for a
+                `gnome-session`-configured custom desktop session.
+              '';
+            };
+          })
+        ];
         shorthandOnlyDefinesConfig = true;
         specialArgs = {
           inherit settingsFormat wrapperManagerLib pkgs;
@@ -157,7 +169,9 @@ in
     };
   };
 
-  config = lib.mkIf (cfg.sessions != { }) {
+  config = lib.mkIf (cfg.sessions != { }) (let
+    validSessions = lib.filterAttrs (_: v: v.enable) cfg.sessions;
+  in {
     xdg.desktopEntries =
       let
         mkComponentEntry = _: component:
@@ -166,7 +180,7 @@ in
         mkSessionComponentDesktopEntries = _: session:
           lib.mapAttrs' mkComponentEntry session.components;
       in
-      lib.concatMapAttrs mkSessionComponentDesktopEntries cfg.sessions;
+      lib.concatMapAttrs mkSessionComponentDesktopEntries validSessions;
 
     files =
       let
@@ -195,7 +209,7 @@ in
           };
         };
       in
-      lib.concatMapAttrs mkSessionFiles cfg.sessions;
+      lib.concatMapAttrs mkSessionFiles validSessions;
 
     programs.systemd.user.units =
       let
@@ -217,6 +231,6 @@ in
           }
           // (lib.concatMapAttrs mkSessionComponentUnits session.components);
       in
-      lib.concatMapAttrs mkSystemdUnitSet cfg.sessions;
-  };
+      lib.concatMapAttrs mkSystemdUnitSet validSessions;
+  });
 }
