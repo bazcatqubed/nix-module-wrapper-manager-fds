@@ -22,6 +22,7 @@ in
   systemd-units = build { modules = [ ./systemd-units.nix ]; };
   systemd-unit-data-format-files = build { modules = [ ./systemd-unit-data-format-files.nix ]; };
   systemd-unit-with-empty-value = build { modules = [ ./systemd-unit-with-empty-value.nix ]; };
+  systemd-automount-and-mount-units = build { modules = [ ./systemd-automount-and-mount-units.nix ]; };
   wrappers-with-systemd-units = build { modules = [ ./wrappers-with-systemd-enabled.nix ]; };
   wrappers-for-yt-dlp = build { modules = [ ./wrappers-for-yt-dlp.nix ]; };
   data-format-files = build { modules = [ ./data-format-files ]; };

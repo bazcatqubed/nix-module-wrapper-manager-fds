@@ -71,6 +71,13 @@
     before = [ "multi-user.target" ];
     wantedBy = [ "sockets.target" ];
     listenStreams = [ "%t/hello" ];
+
+    preStart = ''
+      echo hello server has started
+    '';
+    postStop = ''
+      echo hello server stopped
+    '';
   };
 
   programs.systemd.user.targets.activitywatch = {

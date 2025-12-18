@@ -3,6 +3,43 @@
 let
   settingsFormat = self.formats.systemdIni { };
 
+  integrateCommonExecOptions = config: name: attrName:
+    lib.mkMerge [
+      (mkIf (config.preStart != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-pre-start";
+          text = config.preStart;
+          inherit (config) enableStrictShellChecks;
+        };
+
+        "${attrName}".ExecStartPre = [ jobScripts ];
+      })
+      (mkIf (config.postStart != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-post-start";
+          text = config.postStart;
+          inherit (config) enableStrictShellChecks;
+        };
+        "${attrName}".ExecStartPost = [ jobScripts ];
+      })
+      (mkIf (config.preStop != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-pre-stop";
+          text = config.preStop;
+          inherit (config) enableStrictShellChecks;
+        };
+        "${attrName}".ExecStop = jobScripts;
+      })
+      (mkIf (config.postStop != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-post-stop";
+          text = config.postStop;
+          inherit (config) enableStrictShellChecks;
+        };
+        "${attrName}".ExecStopPost = jobScripts;
+      })
+    ];
+
   inherit (self.systemd)
     assertValueOneOf
     checkUnitConfig
@@ -654,7 +691,8 @@ rec {
         type = types.lines;
         default = "";
         description = ''
-          Shell commands executed to stop the execution environment's .
+          Shell commands executed before the execution environment's main
+          process has exited.
         '';
       };
 
@@ -662,8 +700,8 @@ rec {
         type = types.lines;
         default = "";
         description = ''
-          Shell commands executed after the service's main process
-          has exited.
+          Shell commands executed after the execution environments's main
+          process has exited.
         '';
       };
 
@@ -739,9 +777,9 @@ rec {
     };
 
     config = lib.mkMerge [
-      {
-        settings.Socket = config.socketConfig;
-      }
+      { settings.Socket = config.socketConfig; }
+
+      (integrateCommonExecOptions config name "socketConfig")
 
       (lib.mkIf (config.environment != { }) {
         socketConfig.Environment = let
@@ -767,39 +805,6 @@ rec {
 
       (lib.mkIf (config.listenDatagrams != [ ]) {
         socketConfig.ListenDatagram = config.listenDatagrams;
-      })
-
-      (mkIf (config.preStart != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-pre-start";
-          text = config.preStart;
-          inherit (config) enableStrictShellChecks;
-        };
-        socketConfig.ExecStartPre = [ jobScripts ];
-      })
-      (mkIf (config.postStart != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-post-start";
-          text = config.postStart;
-          inherit (config) enableStrictShellChecks;
-        };
-        socketConfig.ExecStartPost = [ jobScripts ];
-      })
-      (mkIf (config.preStop != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-pre-stop";
-          text = config.preStop;
-          inherit (config) enableStrictShellChecks;
-        };
-        socketConfig.ExecStop = jobScripts;
-      })
-      (mkIf (config.postStop != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-post-stop";
-          text = config.postStop;
-          inherit (config) enableStrictShellChecks;
-        };
-        socketConfig.ExecStopPost = jobScripts;
       })
     ];
 
@@ -846,7 +851,9 @@ rec {
     config.settings.Path = config.pathConfig;
   };
 
-  mountOptions = { config, ... }: {
+  mountOptions = { config, name, ... }: {
+    imports = [ execOptions ];
+
     options = {
       what = mkOption {
         example = "/dev/sda1";
@@ -891,10 +898,16 @@ rec {
       };
     };
 
-    config.settings.Mount = config.mountConfig;
+    config = lib.mkMerge [
+      { settings.Mount = config.mountConfig; }
+
+      (integrateCommonExecOptions config name "mountConfig")
+    ];
   };
 
-  automountOptions = { config, ... }: {
+  automountOptions = { config, name, ... }: {
+    imports = [ execOptions ];
+
     options = {
       where = mkOption {
         example = "/mnt";
@@ -919,7 +932,11 @@ rec {
       };
     };
 
-    config.settings.Automount = config.automountConfig;
+    config = lib.mkMerge [
+      { settings.Automount = config.automountConfig; }
+
+      (integrateCommonExecOptions config name "automountConfig")
+    ];
   };
 
   sliceOptions = { config, ... }: {
