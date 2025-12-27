@@ -26,13 +26,6 @@
     nix = {
       what = "/dev/sda2";
       where = "/nix";
-
-      preStop = ''
-        echo hello
-      '';
-      postStop = ''
-        echo hehehehe
-      '';
     };
   };
 

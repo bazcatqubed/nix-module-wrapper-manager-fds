@@ -3,43 +3,6 @@
 let
   settingsFormat = self.formats.systemdIni { };
 
-  integrateCommonExecOptions = config: name: attrName:
-    lib.mkMerge [
-      (mkIf (config.preStart != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-pre-start";
-          text = config.preStart;
-          inherit (config) enableStrictShellChecks;
-        };
-
-        "${attrName}".ExecStartPre = [ jobScripts ];
-      })
-      (mkIf (config.postStart != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-post-start";
-          text = config.postStart;
-          inherit (config) enableStrictShellChecks;
-        };
-        "${attrName}".ExecStartPost = [ jobScripts ];
-      })
-      (mkIf (config.preStop != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-pre-stop";
-          text = config.preStop;
-          inherit (config) enableStrictShellChecks;
-        };
-        "${attrName}".ExecStop = jobScripts;
-      })
-      (mkIf (config.postStop != "") rec {
-        jobScripts = makeJobScript {
-          name = "${name}-post-stop";
-          text = config.postStop;
-          inherit (config) enableStrictShellChecks;
-        };
-        "${attrName}".ExecStopPost = jobScripts;
-      })
-    ];
-
   inherit (self.systemd)
     assertValueOneOf
     checkUnitConfig
@@ -779,7 +742,38 @@ rec {
     config = lib.mkMerge [
       { settings.Socket = config.socketConfig; }
 
-      (integrateCommonExecOptions config name "socketConfig")
+      (lib.mkIf (config.preStart != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-pre-start";
+          text = config.preStart;
+          inherit (config) enableStrictShellChecks;
+        };
+        socketConfig.ExecStartPre = [ jobScripts ];
+      })
+      (lib.mkIf (config.postStart != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-post-start";
+          text = config.postStart;
+          inherit (config) enableStrictShellChecks;
+        };
+        socketConfig.ExecStartPost = [ jobScripts ];
+      })
+      (lib.mkIf (config.preStop != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-pre-stop";
+          text = config.preStop;
+          inherit (config) enableStrictShellChecks;
+        };
+        socketConfig.ExecStopPre = jobScripts;
+      })
+      (lib.mkIf (config.postStop != "") rec {
+        jobScripts = makeJobScript {
+          name = "${name}-post-stop";
+          text = config.postStop;
+          inherit (config) enableStrictShellChecks;
+        };
+        socketConfig.ExecStopPost = jobScripts;
+      })
 
       (lib.mkIf (config.environment != { }) {
         socketConfig.Environment = let
@@ -852,8 +846,6 @@ rec {
   };
 
   mountOptions = { config, name, ... }: {
-    imports = [ execOptions ];
-
     options = {
       what = mkOption {
         example = "/dev/sda1";
@@ -898,16 +890,10 @@ rec {
       };
     };
 
-    config = lib.mkMerge [
-      { settings.Mount = config.mountConfig; }
-
-      (integrateCommonExecOptions config name "mountConfig")
-    ];
+    config.settings.Mount = config.mountConfig;
   };
 
   automountOptions = { config, name, ... }: {
-    imports = [ execOptions ];
-
     options = {
       where = mkOption {
         example = "/mnt";
@@ -932,11 +918,7 @@ rec {
       };
     };
 
-    config = lib.mkMerge [
-      { settings.Automount = config.automountConfig; }
-
-      (integrateCommonExecOptions config name "automountConfig")
-    ];
+    config.settings.Automount = config.automountConfig;
   };
 
   sliceOptions = { config, ... }: {
