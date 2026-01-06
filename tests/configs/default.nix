@@ -7,29 +7,37 @@ in
 
 let
   wmLib = (import ../../. { }).lib;
-  build = args: wmLib.build (args // { inherit pkgs; });
+  build = args: wmLib.build (args // {
+    inherit pkgs;
+    modules = args.modules or [ ] ++ [
+      ../../modules/wrapper-manager/modular-services.nix
+    ];
+  });
+
+  buildConfig = file: build { modules = [ file ]; };
 in
 {
-  fastfetch = build { modules = [ ./wrapper-fastfetch.nix ]; };
+  fastfetch = buildConfig ./wrapper-fastfetch.nix;
   neofetch = build {
     modules = [ ./wrapper-neofetch.nix ];
     specialArgs.yourMomName = "Yor mom";
   };
-  xdg-desktop-entry = build { modules = [ ./xdg-desktop-entry.nix ]; };
-  xdg-basedirs = build { modules = [ ./xdg-basedirs.nix ]; };
-  single-basepackage = build { modules = [ ./single-basepackage.nix ]; };
-  neofetch-with-additional-files = build { modules = [ ./neofetch-with-additional-files.nix ]; };
-  systemd-units = build { modules = [ ./systemd-units.nix ]; };
-  systemd-unit-data-format-files = build { modules = [ ./systemd-unit-data-format-files.nix ]; };
-  systemd-unit-with-empty-value = build { modules = [ ./systemd-unit-with-empty-value.nix ]; };
-  systemd-automount-and-mount-units = build { modules = [ ./systemd-automount-and-mount-units.nix ]; };
-  wrappers-with-systemd-units = build { modules = [ ./wrappers-with-systemd-enabled.nix ]; };
-  wrappers-for-yt-dlp = build { modules = [ ./wrappers-for-yt-dlp.nix ]; };
-  data-format-files = build { modules = [ ./data-format-files ]; };
-  gnome-session-basic-example = build { modules = [ ./gnome-session-basic-example.nix ]; };
-  gnome-session-basic-example-empty = build { modules = [ ./gnome-session-basic-example-empty.nix ]; };
+  xdg-desktop-entry = buildConfig ./xdg-desktop-entry.nix;
+  xdg-basedirs = buildConfig ./xdg-basedirs.nix;
+  single-basepackage = buildConfig ./single-basepackage.nix;
+  modular-services = buildConfig ./modular-services.nix;
+  neofetch-with-additional-files = buildConfig ./neofetch-with-additional-files.nix;
+  systemd-units = buildConfig ./systemd-units.nix;
+  systemd-unit-data-format-files = buildConfig ./systemd-unit-data-format-files.nix;
+  systemd-unit-with-empty-value = buildConfig ./systemd-unit-with-empty-value.nix;
+  systemd-automount-and-mount-units = buildConfig ./systemd-automount-and-mount-units.nix;
+  wrappers-with-systemd-units = buildConfig ./wrappers-with-systemd-enabled.nix;
+  wrappers-for-yt-dlp = buildConfig ./wrappers-for-yt-dlp.nix;
+  data-format-files = buildConfig ./data-format-files;
+  gnome-session-basic-example = buildConfig ./gnome-session-basic-example.nix;
+  gnome-session-basic-example-empty = buildConfig ./gnome-session-basic-example-empty.nix;
 
   # Testing out from the library set that needs the module environment.
-  lib-modules-make-wraparound = build { modules = [ ./lib-modules-subset/make-wraparound.nix ]; };
-  systemd-lib-module-test = build { modules = [ ./lib-modules-subset/systemd-lib-module-test.nix ]; };
+  lib-modules-make-wraparound = buildConfig ./lib-modules-subset/make-wraparound.nix;
+  systemd-lib-module-test = buildConfig ./lib-modules-subset/systemd-lib-module-test.nix;
 }

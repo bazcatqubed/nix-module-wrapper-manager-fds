@@ -19,6 +19,10 @@
     wrapper-manager = ./modules/env/home-manager;
   };
 
+  wrapperModules = {
+    modular-services = ./modules/wrapper-manager/modular-services.nix;
+  };
+
   # The main library interface that can be used for immediate consumption.
   lib = import ./lib/env.nix;
 
