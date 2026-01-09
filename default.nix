@@ -21,6 +21,7 @@
 
   wrapperModules = {
     modular-services = ./modules/wrapper-manager/modular-services.nix;
+    systemd-modular-services-integration = ./modules/wrapper-manager/programs/systemd/modular-services.nix;
   };
 
   # The main library interface that can be used for immediate consumption.

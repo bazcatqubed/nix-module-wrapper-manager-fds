@@ -31,6 +31,12 @@ in
   systemd-unit-data-format-files = buildConfig ./systemd-unit-data-format-files.nix;
   systemd-unit-with-empty-value = buildConfig ./systemd-unit-with-empty-value.nix;
   systemd-automount-and-mount-units = buildConfig ./systemd-automount-and-mount-units.nix;
+  systemd-modular-service-integration = build {
+    modules = [
+      ./systemd-modular-service-integration.nix
+      ../../modules/wrapper-manager/programs/systemd/modular-services.nix
+    ];
+  };
   wrappers-with-systemd-units = buildConfig ./wrappers-with-systemd-enabled.nix;
   wrappers-for-yt-dlp = buildConfig ./wrappers-for-yt-dlp.nix;
   data-format-files = buildConfig ./data-format-files;
