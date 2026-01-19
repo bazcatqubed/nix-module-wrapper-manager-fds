@@ -172,6 +172,9 @@ in
   config = lib.mkIf (cfg.sessions != { }) (let
     validSessions = lib.filterAttrs (_: v: v.enable) cfg.sessions;
   in {
+    build.extraPassthru.providedSessions =
+      lib.mapAttrsToList (name: _: name) validSessions;
+
     xdg.desktopEntries =
       let
         mkComponentEntry = _: component:

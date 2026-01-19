@@ -122,6 +122,7 @@ in
         && workflowSettings.components.window-manager.id == "${workflowId}.window-manager"
         && workflowSettings.components.window-manager.systemd.socketUnit == null
         && workflowSettings.components.window-manager.systemd.pathUnit == null
+        && config.build.extraPassthru.providedSessions == [ workflowId ]
       ) pkgs.emptyFile;
   };
   # end::test[]
