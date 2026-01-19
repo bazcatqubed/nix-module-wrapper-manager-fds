@@ -361,6 +361,42 @@ To enable them, you'll have to set xref:./wm-options.adoc#_locale_enable[`locale
 You could also change the locale archive package with xref:./wm-options.adoc#_locale_package[`locale.package`].
 
 
+[#modular-services]
+=== Modular services
+
+wrapper-manager-fds has support for https://nixos.org/manual/nixos/stable/#modular-services[Modular services] which allows easy instantiation of services through different configuration frameworks (e.g., NixOS, process-manager).
+Though, just like the feature itself, it is experimental (as of NixOS 25.11) so it is not imported by default.
+You have to manually import the module yourself to make this work like in the following code block.
+
+[source, nix]
+----
+{
+  # If you're using inside of the wrapper-manager configuration, you can use
+  # the `modulesPath` module argument which is set through `specialArgs`.
+  imports = [ "${modulesPath}/modular-services" ];
+
+  # If you're using it through the user entrypoint, they're available from
+  # `wrapperModules` attribute.
+  imports = [ wmEntrypoint.wrapperModules.modular-services ];
+}
+----
+
+[WARNING]
+====
+All of the features and options in this section are experimental and can change without any warning.
+====
+
+Once you have imported them, you can easily create wrappers configured through the modular services through xref:./wm-options.adoc#_environment_services[`environment.services`].
+
+[source, nix]
+----
+include::example$configs/modular-services.nix[tag=!*]
+----
+
+There is also an integration module with systemd though that requires importing yet another module for it (i.e., `"${modulesPath}/programs/systemd/modular-services.nix"` if inside the configuration, `wrapperModules.systemd-modular-services-integration`).
+Though once it is imported, you don't have to touch anything else as it will generate them systemd units in the output.
+
+
 [#as-a-standalone-package]
 === As a standalone package
 

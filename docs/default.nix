@@ -66,7 +66,10 @@ let
 
   wrapperManagerLib = (import ../. { }).lib;
   wmOptionsDoc = evalDoc {
-    modules = [ ../modules/wrapper-manager ] ++ extraModules;
+    modules = [
+      ../modules/wrapper-manager
+      ../modules/wrapper-manager/modular-services.nix
+    ] ++ extraModules;
     includeModuleSystemOptions = true;
   };
   wmNixosDoc = evalDoc { modules = [ ../modules/env/nixos ]; };
