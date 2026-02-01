@@ -48,7 +48,7 @@
       let
         wrapper = config.build.toplevel;
       in
-      pkgs.runCommand "wrapper-manager-neofetch-actually-built" { } ''
+      pkgs.runCommand "wrapper-manager-neofetch-with-additional-files-actually-built" { } ''
         [ -x "${wrapper}/bin/${config.wrappers.neofetch.executableName}" ] \
         && [ -f "${wrapper}/share/nix/hello" ] \
         && [ -f "${wrapper}/share/nix/aloha" ] \
