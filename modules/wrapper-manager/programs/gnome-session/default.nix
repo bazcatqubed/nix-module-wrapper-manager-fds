@@ -40,7 +40,6 @@ in
           {
             fullName = "GNOME (minimal)";
             description = "Minimal GNOME session";
-            display = [ "wayland" "xorg" ];
             extraArgs = [ "--systemd" ];
 
             requiredComponents =
@@ -70,7 +69,6 @@ in
           "one.foodogsquared.SimpleWay" = {
             fullName = "Simple Way";
             description = "A desktop environment featuring Sway window manager.";
-            display = [ "wayland" ];
             extraArgs = [ "--systemd" ];
 
             components = {
