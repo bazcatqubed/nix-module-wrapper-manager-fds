@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 /**
   The VERY VERY root of wrapper-manager. This is the subset involving
   wrapper-manager environments. So far, you can evaluate and build a

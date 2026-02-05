@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2025-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+//
+// SPDX-License-Identifier: GFDL-1.3-or-later
+
 = User guide
 
 While the xref:./project-overview.adoc[] should be enough to get you started, this document contain all of the information you may need to make full use of wrapper-manager.

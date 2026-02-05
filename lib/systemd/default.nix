@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 /*
   A fork of the NixOS systemd library from nixpkgs suited for wrapper-manager's
   needs. The major reason it is forked instead of using it directly is because

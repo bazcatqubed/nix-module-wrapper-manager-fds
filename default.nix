@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 # The user entrypoint which makes it especially important to be maintained.
 #
 # Anyways, we just keep this attribute set for forward compatability in case it

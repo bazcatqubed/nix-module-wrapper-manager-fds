@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 { config, lib, pkgs, ... }: {
   dataFormats.files."/etc/app/config.json".content = let
     cfg = config.dataFormats.files."/etc/app/config.json".content;

@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 # Literally just the basic gnome-session test but should result in an empty
 # output.
 { config, lib, pkgs, ... }:

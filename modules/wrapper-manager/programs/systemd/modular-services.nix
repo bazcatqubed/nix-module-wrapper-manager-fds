@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 # systemd-slash-wrapper-manager-fds integration for modular services.
 { config, lib, pkgs, ... }:
 

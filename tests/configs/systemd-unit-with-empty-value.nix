@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 # The (reduced) basic systemd unit test but some of the units are disabled and
 # should be absent in the final output. Though, disabled units should still
 # have their metadata.

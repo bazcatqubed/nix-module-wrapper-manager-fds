@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 .PHONY: docs-serve
 docs-serve:
 	inotifywait --monitor --event modify --recursive docs/website --exclude "node_modules" | while read -r path action file; do antora generate site.yml; done

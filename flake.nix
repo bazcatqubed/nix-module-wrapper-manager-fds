@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 # As a design restriction, this flake shouldn't have any inputs whatsoever.
 # We're already using the Nix projects through pinning with npins.
 {

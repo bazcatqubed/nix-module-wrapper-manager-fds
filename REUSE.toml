@@ -1,0 +1,20 @@
+# SPDX-FileCopyrightText: 2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
+version = 1
+SPDX-PackageName = "nix-module-wrapper-manager-fds"
+
+[[annotations]]
+path = [
+  "flake.lock",
+  "npins/*.json",
+  "release.json",
+  "tests/**/*.schema.json",
+  "docs/website/package.json",
+  "docs/website/package-lock.json",
+  "docs/examples/**",
+]
+precedence = "closest"
+SPDX-FileCopyrightText = "Gabriel Arazas <foodogsquared@foodogsquared.one>"
+SPDX-License-Identifier = "MIT"

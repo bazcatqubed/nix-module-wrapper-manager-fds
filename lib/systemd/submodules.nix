@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2025-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 /**
   A convenient set of module types for the systemd unit. Take note, all of the
   documented items here contain a list of modules and intended to be included as

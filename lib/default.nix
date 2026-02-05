@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2024-2026 Gabriel Arazas <foodogsquared@foodogsquared.one>
+#
+# SPDX-License-Identifier: MIT
+
 # The wrapper-manager library set. It should only require a nixpkgs instance to
 # make initializing this set easier. This what makes it possible to be used as
 # part of the module environments and as a standalone library.
