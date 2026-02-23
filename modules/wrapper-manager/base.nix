@@ -8,6 +8,31 @@
 let
   envConfig = config;
 
+  argsSubmodule = { name, lib, ... }: {
+    imports = [
+      (lib.mkAliasOptionModule [ "args" ] [ "text" ])
+    ];
+
+    options = {
+      deps = lib.mkOption {
+        type = with lib.types; listOf str;
+        default = [ ];
+        description = ''
+          List of dependencies which the set of arguments to be ordered
+          against.
+        '';
+      };
+
+      text = lib.mkOption {
+        type = with lib.types; listOf str;
+        default = [ ];
+        description = ''
+          The arguments of the script.
+        '';
+      };
+    };
+  };
+
   toStringType =
     (
       with lib.types;
@@ -173,12 +198,50 @@ let
           '';
           example = [ "--inherit-argv0" ];
         };
+
+        argvDag = lib.mkOption {
+          type = with lib.types; attrsOf (submodule argsSubmodule);
+          description = ''
+            A graph of arguments for the wrapper script. This is used for
+            ordering arguments especially once wraparound programs are in place
+            (e.g., sudo, Bubblewrap).
+          '';
+          default = { };
+          example = lib.literalExpression ''
+            {
+              "main" = {
+                deps = [ ];
+                text = [
+                  config.arg0
+                ];
+              };
+            }
+          '';
+          visible = false;
+        };
+
+        argv = lib.mkOption {
+          type = with lib.types; listOf str;
+          description = ''
+            The final list of script and its arguments. This is mainly used if
+            the user wants to deviate from using `makeWrapper`.
+          '';
+          readOnly = true;
+        };
       };
 
       config = lib.mkMerge [
         {
           env = envConfig.environment.variables;
           pathAdd = envConfig.environment.pathAdd;
+
+          argvDag.main = lib.noDepEntry (
+            [ config.arg0 ]
+            ++ config.prependArgs
+            ++ config.appendArgs
+          );
+
+          argv = lib.flatten (lib.textClosureList config.argvDag (lib.attrNames config.argvDag));
 
           makeWrapperArgs =
             lib.mapAttrsToList (

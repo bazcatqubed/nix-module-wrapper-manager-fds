@@ -22,6 +22,7 @@ in
     modules = [ ./wrapper-neofetch.nix ];
     specialArgs.yourMomName = "Yor mom";
   };
+  basic-wrapper-information = buildConfig ./basic-wrapper-information.nix;
   xdg-desktop-entry = buildConfig ./xdg-desktop-entry.nix;
   xdg-basedirs = buildConfig ./xdg-basedirs.nix;
   single-basepackage = buildConfig ./single-basepackage.nix;
