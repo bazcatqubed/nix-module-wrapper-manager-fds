@@ -11,6 +11,7 @@
 }:
 
 {
+  build.drvName = "simple-womp-womp";
   build.variant = "shell";
 
   wrappers.fastfetch = {
@@ -41,6 +42,14 @@
         && [ -x "${wrapper}/bin/${config.wrappers.fastfetch.executableName}" ] \
         && touch $out
       '';
+
+      checkMetadata =
+        let
+          wrapper = config.build.toplevel;
+        in
+        lib.optionalAttrs (
+          wrapper.name == config.build.drvName
+          ) pkgs.emptyFile;
   };
   # end::test[]
 }

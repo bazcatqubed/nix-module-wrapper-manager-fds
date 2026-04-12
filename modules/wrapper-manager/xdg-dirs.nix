@@ -18,7 +18,7 @@ let
       example = lib.literalExpression ''
         wrapperManagerLib.getXdgConfigDirs (with pkgs; [
           yt-dlp
-          neofetch
+          fastfetch
         ])
       '';
     };
@@ -33,7 +33,7 @@ let
       example = lib.literalExpression ''
         wrapperManagerLib.getXdgDataDirs (with pkgs; [
           yt-dlp
-          neofetch
+          fastfetch
         ])
       '';
     };

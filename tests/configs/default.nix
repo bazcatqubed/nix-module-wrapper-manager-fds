@@ -22,15 +22,11 @@ let
 in
 {
   fastfetch = buildConfig ./wrapper-fastfetch.nix;
-  neofetch = build {
-    modules = [ ./wrapper-neofetch.nix ];
-    specialArgs.yourMomName = "Yor mom";
-  };
   xdg-desktop-entry = buildConfig ./xdg-desktop-entry.nix;
   xdg-basedirs = buildConfig ./xdg-basedirs.nix;
   single-basepackage = buildConfig ./single-basepackage.nix;
   modular-services = buildConfig ./modular-services.nix;
-  neofetch-with-additional-files = buildConfig ./neofetch-with-additional-files.nix;
+  with-additional-files = buildConfig ./with-additional-files.nix;
   systemd-units = buildConfig ./systemd-units.nix;
   systemd-unit-data-format-files = buildConfig ./systemd-unit-data-format-files.nix;
   systemd-unit-with-empty-value = buildConfig ./systemd-unit-with-empty-value.nix;

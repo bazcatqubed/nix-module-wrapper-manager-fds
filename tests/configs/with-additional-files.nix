@@ -10,15 +10,11 @@
 }:
 
 {
-  wrappers.neofetch = {
-    arg0 = lib.getExe' pkgs.neofetch "neofetch";
+  wrappers.fastfetch = {
+    arg0 = lib.getExe' pkgs.fastfetch "fastfetch";
     appendArgs = [
-      "--ascii_distro"
+      "--logo"
       "guix"
-      "--title_fqdn"
-      "off"
-      "--os_arch"
-      "off"
     ];
   };
 
@@ -52,8 +48,8 @@
       let
         wrapper = config.build.toplevel;
       in
-      pkgs.runCommand "wrapper-manager-neofetch-with-additional-files-actually-built" { } ''
-        [ -x "${wrapper}/bin/${config.wrappers.neofetch.executableName}" ] \
+      pkgs.runCommand "wrapper-manager-fastfetch-with-additional-files-actually-built" { } ''
+        [ -x "${wrapper}/bin/${config.wrappers.fastfetch.executableName}" ] \
         && [ -f "${wrapper}/share/nix/hello" ] \
         && [ -f "${wrapper}/share/nix/aloha" ] \
         && [ -x "${wrapper}/share/nix/example" ] \

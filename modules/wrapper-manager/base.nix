@@ -137,7 +137,7 @@ let
           description = ''
             The first argument of the wrapper script.
           '';
-          example = lib.literalExpression "lib.getExe' pkgs.neofetch \"neofetch\"";
+          example = lib.literalExpression "lib.getExe' pkgs.fastfetch \"fastfetch\"";
         };
 
         executableName = lib.mkOption {

@@ -88,14 +88,6 @@ in
       example = lib.literalExpression ''
         {
           custom-ricing = { lib, pkgs, ... }: {
-            wrappers.neofetch = {
-              arg0 = lib.getExe' pkgs.neofetch "neofetch";
-              appendArgs = [
-                "--ascii-distro" "guix"
-                "--config" ./config/neofetch/config
-              ];
-            };
-
             wrappers.fastfetch = {
               arg0 = lib.getExe' pkgs.fastfetch "fastfetch";
               appendArgs = [
