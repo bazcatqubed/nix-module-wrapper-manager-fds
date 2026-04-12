@@ -7,7 +7,7 @@
 let
   cfg = config.environment.services;
 
-  portable-lib = import "${pkgs.path}/nixos/modules/system/service/portable/lib.nix" { inherit lib; };
+  portable-lib = import "${pkgs.path}/lib/services/lib.nix" { inherit lib; };
 
   moduleServiceConfiguration = portable-lib.configure {
     serviceManagerPkgs = pkgs;
