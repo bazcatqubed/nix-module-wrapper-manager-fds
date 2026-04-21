@@ -28,3 +28,7 @@ update:
 .PHONY: format
 format:
 	treefmt
+
+.PHONY: check-reuse
+check-reuse:
+	reuse lint
