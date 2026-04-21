@@ -2,7 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, lib, self }:
+{
+  pkgs,
+  lib,
+  self,
+}:
 
 lib.runTests {
   testSystemdINIBasic = {
@@ -18,7 +22,10 @@ lib.runTests {
   testSystemdINIBasicWithMultipleSections = {
     expr = self.generators.toSystemdINI {
       Unit = {
-        Description = [ "man:systemctl" "https://systemd.io" ];
+        Description = [
+          "man:systemctl"
+          "https://systemd.io"
+        ];
       };
 
       Service.ExecStart = "systemctl --help";

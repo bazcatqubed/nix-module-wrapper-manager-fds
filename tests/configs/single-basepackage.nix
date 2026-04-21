@@ -38,11 +38,10 @@
         wrapper = config.build.toplevel;
         expectedDefaultDrvName = "${fastfetch.pname}-${fastfetch.version}-wm-wrapped";
       in
-        lib.optionalAttrs (
-          # We're checking the default value
-          config.build.drvName == expectedDefaultDrvName
-          && wrapper.name == expectedDefaultDrvName
-        ) pkgs.emptyFile;
+      lib.optionalAttrs (
+        # We're checking the default value
+        config.build.drvName == expectedDefaultDrvName && wrapper.name == expectedDefaultDrvName
+      ) pkgs.emptyFile;
   };
   # end::test[]
 }

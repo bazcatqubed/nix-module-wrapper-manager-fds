@@ -2,10 +2,23 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ name, config, pkgs, lib, wrapperManagerLib, session, ... }:
+{
+  name,
+  config,
+  pkgs,
+  lib,
+  wrapperManagerLib,
+  session,
+  ...
+}:
 
 let
-  optionalSystemdUnitOption = { unitType, systemdModuleAttribute, otherType, }:
+  optionalSystemdUnitOption =
+    {
+      unitType,
+      systemdModuleAttribute,
+      otherType,
+    }:
     lib.mkOption {
       type = lib.types.nullOr otherType;
       description = ''
@@ -21,9 +34,16 @@ let
       default = null;
     };
 
-  submodule' = name:
-    lib.singleton ({ lib, ... }: { _module.args.name = lib.mkForce name; });
-in {
+  submodule' =
+    name:
+    lib.singleton (
+      { lib, ... }:
+      {
+        _module.args.name = lib.mkForce name;
+      }
+    );
+in
+{
   options = {
     description = lib.mkOption {
       type = lib.types.nonEmptyStr;
@@ -76,7 +96,9 @@ in {
       # NixOS systemd extensions as much as possible. For more details, see
       # `config` attribute of the `sessionType`.
       serviceUnit = lib.mkOption {
-        type = lib.types.submodule (wrapperManagerLib.systemd.submodules.services ++ (submodule' config.id));
+        type = lib.types.submodule (
+          wrapperManagerLib.systemd.submodules.services ++ (submodule' config.id)
+        );
         description = ''
           systemd service configuration to be generated. This should be
           configured if the session is managed by systemd.
@@ -98,10 +120,7 @@ in {
       };
 
       targetUnit = lib.mkOption {
-        type = lib.types.submodule (
-          wrapperManagerLib.systemd.submodules.targets
-          ++ (submodule' config.id)
-        );
+        type = lib.types.submodule (wrapperManagerLib.systemd.submodules.targets ++ (submodule' config.id));
         description = ''
           systemd target configuration to be generated. This should be
           configured if the session is managed by systemd.
@@ -122,8 +141,7 @@ in {
         unitType = "timer";
         systemdModuleAttribute = "timers";
         otherType = lib.types.submodule (
-          wrapperManagerLib.systemd.submodules.timers
-          ++ (submodule' config.id)
+          wrapperManagerLib.systemd.submodules.timers ++ (submodule' config.id)
         );
       };
 
@@ -131,8 +149,7 @@ in {
         unitType = "socket";
         systemdModuleAttribute = "sockets";
         otherType = lib.types.submodule (
-          wrapperManagerLib.systemd.submodules.sockets
-          ++ (submodule' config.id)
+          wrapperManagerLib.systemd.submodules.sockets ++ (submodule' config.id)
         );
       };
 
@@ -140,8 +157,7 @@ in {
         unitType = "path";
         systemdModuleAttribute = "paths";
         otherType = lib.types.submodule (
-          wrapperManagerLib.systemd.submodules.paths
-          ++ (submodule' config.id)
+          wrapperManagerLib.systemd.submodules.paths ++ (submodule' config.id)
         );
       };
     };
@@ -168,7 +184,7 @@ in {
         let
           script = pkgs.writeShellScript "${session.name}-${name}-script" config.script;
         in
-          lib.mkDefault (builtins.toString script);
+        lib.mkDefault (builtins.toString script);
       noDisplay = lib.mkForce true;
       onlyShowIn = session.desktopNames;
 
@@ -183,31 +199,32 @@ in {
       };
     };
 
-    /* Setting some recommendation and requirements for systemd-managed
-       gnome-session components. Note there are the missing directives that
-       COULD include some sane defaults here.
+    /*
+      Setting some recommendation and requirements for systemd-managed
+      gnome-session components. Note there are the missing directives that
+      COULD include some sane defaults here.
 
-       * The `Unit.OnFailure=` and `Unit.OnFailureJobMode=` directives. Since
-       different components don't have the same priority and don't handle
-       failures the same way, we didn't set it here. This is on the user to
-       know how different desktop components interact with each other
-       especially if one of them failed.
+      * The `Unit.OnFailure=` and `Unit.OnFailureJobMode=` directives. Since
+      different components don't have the same priority and don't handle
+      failures the same way, we didn't set it here. This is on the user to
+      know how different desktop components interact with each other
+      especially if one of them failed.
 
-       * Even if we have a way to limit starting desktop components with
-       `systemd-xdg-autostart-condition`, using `Service.ExecCondition=` would
-       severely limit possible reuse of desktop components with other
-       NixOS-module-generated gnome-session sessions so we're not bothering with
-       those.
+      * Even if we have a way to limit starting desktop components with
+      `systemd-xdg-autostart-condition`, using `Service.ExecCondition=` would
+      severely limit possible reuse of desktop components with other
+      NixOS-module-generated gnome-session sessions so we're not bothering with
+      those.
 
-       * `Service.Type=` is obviously not included since not all desktop
-       components are the same either. Some of them could be a D-Bus service,
-       some of them are oneshots, etc. Though, it might be better to have this
-       as an explicit option set by the user instead of setting `Type=notify` as
-       a default.
+      * `Service.Type=` is obviously not included since not all desktop
+      components are the same either. Some of them could be a D-Bus service,
+      some of them are oneshots, etc. Though, it might be better to have this
+      as an explicit option set by the user instead of setting `Type=notify` as
+      a default.
 
-       * Most sandboxing options. Aside from the fact we're dealing with a
-       systemd user unit, much of them are unnecessary and rarely needed (if
-       ever like `Service.PrivateTmp=`?) so we didn't set such defaults here.
+      * Most sandboxing options. Aside from the fact we're dealing with a
+      systemd user unit, much of them are unnecessary and rarely needed (if
+      ever like `Service.PrivateTmp=`?) so we didn't set such defaults here.
     */
     systemd.serviceUnit = {
       script = lib.mkAfter config.script;
@@ -246,14 +263,15 @@ in {
       };
     };
 
-    /* Take note, we'll assume the session target unit will be the one to set
-       the dependency-related directives (i.e., `After=`, `Before=`, `Requires=`)
-       so no need to set any in here.
+    /*
+      Take note, we'll assume the session target unit will be the one to set
+      the dependency-related directives (i.e., `After=`, `Before=`, `Requires=`)
+      so no need to set any in here.
 
-       And another thing, we didn't set a default value for dependency-related
-       directives to one of the gnome-session-specific target unit. It is more
-       likely for a user to design their own desktop session with full control
-       so it would be better for these options to be empty for less confusion.
+      And another thing, we didn't set a default value for dependency-related
+      directives to one of the gnome-session-specific target unit. It is more
+      likely for a user to design their own desktop session with full control
+      so it would be better for these options to be empty for less confusion.
     */
     systemd.targetUnit = {
       # This should be the dependency-related directive to be configured. The
@@ -261,7 +279,10 @@ in {
       wants = [ "${config.id}.service" ];
 
       description = lib.mkDefault config.description;
-      documentation = [ "man:gnome-session(1)" "man:systemd.special(7)" ];
+      documentation = [
+        "man:gnome-session(1)"
+        "man:systemd.special(7)"
+      ];
 
       # Similar to the service unit, this is very much required as noted from
       # the `gnome-session(1)` manual page.

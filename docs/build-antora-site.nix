@@ -2,7 +2,17 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ lib, stdenv, fetchurl, importNpmLock, fetchNpmDeps, cacert, antora, npmHooks, nodejs }:
+{
+  lib,
+  stdenv,
+  fetchurl,
+  importNpmLock,
+  fetchNpmDeps,
+  cacert,
+  antora,
+  npmHooks,
+  nodejs,
+}:
 
 lib.extendMkDerivation {
   constructDrv = stdenv.mkDerivation;
@@ -39,66 +49,75 @@ lib.extendMkDerivation {
       # An override function for the NPM module fetcher.
       overrideModAttrs ? (_: _: { }),
       ...
-    }
-    @args:
+    }@args:
     lib.optionalAttrs (modHash != null) {
-      npmDeps = (fetchNpmDeps {
-        inherit (finalAttrs) version;
-        src = finalAttrs.modRoot or finalAttrs.src;
-        pname = "${finalAttrs.pname}-${finalAttrs.version}-npm-modules";
-        hash = modHash;
-      }).overrideAttrs (finalAttrs.passthru.overrideModAttrs or overrideModAttrs);
+      npmDeps =
+        (fetchNpmDeps {
+          inherit (finalAttrs) version;
+          src = finalAttrs.modRoot or finalAttrs.src;
+          pname = "${finalAttrs.pname}-${finalAttrs.version}-npm-modules";
+          hash = modHash;
+        }).overrideAttrs
+          (finalAttrs.passthru.overrideModAttrs or overrideModAttrs);
     }
     // {
       dontFixup = args.dontFixup or true;
       doCheck = args.doCheck or true;
 
-      impureEnvVars = args.impureEnvVars or [] ++ lib.fetchers.proxyImpureEnvVars;
+      impureEnvVars = args.impureEnvVars or [ ] ++ lib.fetchers.proxyImpureEnvVars;
 
-      nativeBuildInputs = args.nativeBuildInputs or [ ] ++ [
-        cacert
-      ] ++ lib.optionals (modHash != null) [
-        npmHooks.npmConfigHook
-        nodejs
-      ] ++ lib.optionals (modHash == null) [ antora ];
+      nativeBuildInputs =
+        args.nativeBuildInputs or [ ]
+        ++ [
+          cacert
+        ]
+        ++ lib.optionals (modHash != null) [
+          npmHooks.npmConfigHook
+          nodejs
+        ]
+        ++ lib.optionals (modHash == null) [ antora ];
 
-      buildInputs =
-        args.buildInputs or [ ]
-        ++ lib.optionals (modHash != null) [ nodejs ];
+      buildInputs = args.buildInputs or [ ] ++ lib.optionals (modHash != null) [ nodejs ];
 
       strictDeps = true;
 
       buildFlags =
         lib.optionals (playbookFile != "") [ playbookFile ]
-        ++ lib.optionals (buildDir != "") [ "--to-dir" buildDir ]
-        ++ lib.optionals (uiBundle != null) [ "--ui-bundle-url" uiBundle ];
+        ++ lib.optionals (buildDir != "") [
+          "--to-dir"
+          buildDir
+        ]
+        ++ lib.optionals (uiBundle != null) [
+          "--ui-bundle-url"
+          uiBundle
+        ];
 
-      postPatch =
-        lib.optionalString (finalAttrs.modRoot or null != null) ''
-          cp "${finalAttrs.modRoot}/package.json" ./package.json
-          cp "${finalAttrs.modRoot}/package-lock.json" ./package-lock.json
+      postPatch = lib.optionalString (finalAttrs.modRoot or null != null) ''
+        cp "${finalAttrs.modRoot}/package.json" ./package.json
+        cp "${finalAttrs.modRoot}/package-lock.json" ./package-lock.json
+      '';
+
+      buildPhase =
+        args.buildPhase or ''
+          runHook preBuild
+
+          ${lib.optionalString (finalAttrs.npmDeps or null != null) ''
+            export PATH=node_modules/.bin''${PATH:+":$PATH"}
+          ''}
+          antora generate ''${buildFlags[@]}
+
+          runHook postBuild
         '';
 
-      buildPhase = args.buildPhase or ''
-        runHook preBuild
+      installPhase =
+        args.installPhase or ''
+          runHook preInstall
 
-        ${lib.optionalString (finalAttrs.npmDeps or null != null) ''
-          export PATH=node_modules/.bin''${PATH:+":$PATH"}
-        ''}
-        antora generate ''${buildFlags[@]}
+          mkdir -p $out && cp -r ${lib.escapeShellArg buildDir}/* $out
 
-        runHook postBuild
-      '';
+          runHook postInstall
+        '';
 
-      installPhase = args.installPhase or ''
-        runHook preInstall
-
-        mkdir -p $out && cp -r ${lib.escapeShellArg buildDir}/* $out
-
-        runHook postInstall
-      '';
-
-      passthru = args.passthru or { }
-        // lib.optionalAttrs (uiBundle != null) { inherit uiBundle; };
+      passthru = args.passthru or { } // lib.optionalAttrs (uiBundle != null) { inherit uiBundle; };
     };
 }

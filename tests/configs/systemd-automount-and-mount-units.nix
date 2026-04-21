@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   programs.systemd.system.automounts = {
@@ -40,25 +45,25 @@
         wrapper = config.build.toplevel;
         systemdDir = "${wrapper}/etc/systemd";
       in
-        pkgs.runCommand "wrapper-manager-systemd-automount-and-mount-units-actually-built" { } ''
+      pkgs.runCommand "wrapper-manager-systemd-automount-and-mount-units-actually-built" { } ''
         [ -f "${systemdDir}/system/gnu.mount" ] \
         && [ -f "${systemdDir}/system/home.mount" ] \
         && [ -f "${systemdDir}/system/nix.mount" ] \
         && [ -f "${systemdDir}/system/media-archives.automount" ] \
         && [ -L "${systemdDir}/system/guix-daemon.service.wants" ] \
         && touch $out
-        '';
+      '';
 
     checkMetadata =
       let
         inherit (config.programs) systemd;
       in
-        lib.optionalAttrs (
-          systemd.system.mounts."gnu".name == "gnu.mount"
-          && systemd.system.mounts."nix".name == "nix.mount"
-          && systemd.system.mounts."home".name == "home.mount"
-          && systemd.system.automounts."media-archives".name == "media-archives.automount"
-        ) pkgs.emptyFile;
+      lib.optionalAttrs (
+        systemd.system.mounts."gnu".name == "gnu.mount"
+        && systemd.system.mounts."nix".name == "nix.mount"
+        && systemd.system.mounts."home".name == "home.mount"
+        && systemd.system.automounts."media-archives".name == "media-archives.automount"
+      ) pkgs.emptyFile;
   };
   # end::test[]
 }

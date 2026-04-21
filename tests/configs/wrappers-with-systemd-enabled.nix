@@ -2,12 +2,20 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   wrappers.fastfetch = {
     arg0 = lib.getExe' pkgs.fastfetch "fastfetch";
-    appendArgs = [ "--logo" "Guix" ];
+    appendArgs = [
+      "--logo"
+      "Guix"
+    ];
     env.NO_COLOR.value = "1";
     systemd.enable = true;
     systemd.serviceUnit = {
@@ -15,14 +23,21 @@
       settings = {
         description = "fastfetch service that exists for some reason";
         wantedBy = [ "default.target" ];
-        extraSectionsConfig.HELLO.THERE = [ "WORLD" "WITH" "COMMA" ];
+        extraSectionsConfig.HELLO.THERE = [
+          "WORLD"
+          "WITH"
+          "COMMA"
+        ];
       };
     };
   };
 
   wrappers.yt-dlp-audio = {
     arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
-    appendArgs = [ "--config-location" (placeholder "out") ];
+    appendArgs = [
+      "--config-location"
+      (placeholder "out")
+    ];
     systemd.enable = true;
     systemd.variant = "system";
     systemd.serviceUnit = {

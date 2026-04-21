@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   workflowId = "com.example.ExampleSession";
@@ -78,7 +83,10 @@ in
         };
 
         systemd.targetUnit = {
-          partOf = [ "graphical-session.target" "gnome-session.target" ];
+          partOf = [
+            "graphical-session.target"
+            "gnome-session.target"
+          ];
         };
       };
     };
@@ -86,9 +94,10 @@ in
 
   # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
-    actuallyBuilt = let
-      wrapper = config.build.toplevel;
-    in
+    actuallyBuilt =
+      let
+        wrapper = config.build.toplevel;
+      in
       pkgs.runCommand "wrapper-manager-test-gnome-session-actually-built" { } ''
         # This should only contain a gnome-session-configured desktop session
         # and nothing else.

@@ -4,7 +4,12 @@
 
 # Literally just the basic gnome-session test but should result in an empty
 # output.
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   workflowId = "com.example.ExampleSession";
@@ -81,7 +86,10 @@ in
         };
 
         systemd.targetUnit = {
-          partOf = [ "graphical-session.target" "gnome-session.target" ];
+          partOf = [
+            "graphical-session.target"
+            "gnome-session.target"
+          ];
         };
       };
     };
@@ -89,9 +97,10 @@ in
 
   # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
-    actuallyBuilt = let
-      wrapper = config.build.toplevel;
-    in
+    actuallyBuilt =
+      let
+        wrapper = config.build.toplevel;
+      in
       pkgs.runCommand "wrapper-manager-test-gnome-session-empty-actually-built-with-nothing" { } ''
         # This should only contain a gnome-session-configured desktop session
         # and nothing else.

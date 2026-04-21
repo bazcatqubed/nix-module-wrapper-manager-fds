@@ -2,7 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, lib, self }:
+{
+  pkgs,
+  lib,
+  self,
+}:
 
 rec {
   /**
@@ -27,29 +31,29 @@ rec {
     }
     ```
   */
-  systemdIni = { }: {
-    type =
-      with lib.types;
-      let
-        atomUnit = oneOf [
-          bool
-          int
-          path
-          str
-        ];
+  systemdIni =
+    { }:
+    {
+      type =
+        with lib.types;
+        let
+          atomUnit = oneOf [
+            bool
+            int
+            path
+            str
+          ];
 
-        atomUnit' = either atomUnit (listOf atomUnit);
+          atomUnit' = either atomUnit (listOf atomUnit);
 
-        sectionUnit = (attrsOf atomUnit') // {
-          description = "systemd INI section";
-        };
-      in
+          sectionUnit = (attrsOf atomUnit') // {
+            description = "systemd INI section";
+          };
+        in
         attrsOf (either sectionUnit (listOf sectionUnit));
 
-    generate =
-      name: value:
-        pkgs.writeText name (self.generators.toSystemdINI value);
-  };
+      generate = name: value: pkgs.writeText name (self.generators.toSystemdINI value);
+    };
 
   /**
     Nix-representable format for GLib keyfile INI format as described from [its
@@ -76,23 +80,26 @@ rec {
     }
     ```
   */
-  glibKeyfileIni = { }: {
-    type = with lib.types;
-      let
-        atomUnit = oneOf [
-          bool
-          float
-          int
-          str
-          (listOf atomUnit)
-        ] // {
-          description =
-            "GLib keyfile atom (bool, int, float, string, or a list of the previous atoms)";
-        };
-      in attrsOf (attrsOf atomUnit);
+  glibKeyfileIni =
+    { }:
+    {
+      type =
+        with lib.types;
+        let
+          atomUnit =
+            oneOf [
+              bool
+              float
+              int
+              str
+              (listOf atomUnit)
+            ]
+            // {
+              description = "GLib keyfile atom (bool, int, float, string, or a list of the previous atoms)";
+            };
+        in
+        attrsOf (attrsOf atomUnit);
 
-    generate =
-      name: value:
-        pkgs.writeText name (lib.generators.toDconfINI value);
-  };
+      generate = name: value: pkgs.writeText name (lib.generators.toDconfINI value);
+    };
 }

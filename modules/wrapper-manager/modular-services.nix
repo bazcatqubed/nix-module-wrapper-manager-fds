@@ -2,7 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, options, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  options,
+  ...
+}:
 
 let
   cfg = config.environment.services;
@@ -41,22 +47,22 @@ in
     '';
   };
 
-  config = let
-    mkSubmoduleWarnings = fn: name: cfg:
-      fn (options.environment.services.loc ++ [ name ]) cfg;
-  in {
-    assertions = lib.concatLists (
-      lib.mapAttrsToList (mkSubmoduleWarnings portable-lib.getAssertions) cfg
-    );
+  config =
+    let
+      mkSubmoduleWarnings =
+        fn: name: cfg:
+        fn (options.environment.services.loc ++ [ name ]) cfg;
+    in
+    {
+      assertions = lib.concatLists (
+        lib.mapAttrsToList (mkSubmoduleWarnings portable-lib.getAssertions) cfg
+      );
 
-    warnings = lib.concatLists (
-      lib.mapAttrsToList (mkSubmoduleWarnings portable-lib.getWarnings) cfg
-    );
+      warnings = lib.concatLists (lib.mapAttrsToList (mkSubmoduleWarnings portable-lib.getWarnings) cfg);
 
-    wrappers =
-      lib.mapAttrs (name: value: {
+      wrappers = lib.mapAttrs (name: value: {
         arg0 = lib.head value.process.argv;
         appendArgs = lib.tail value.process.argv;
       }) cfg;
-  };
+    };
 }

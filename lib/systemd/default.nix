@@ -27,7 +27,6 @@
   self,
 }:
 
-
 rec {
   /**
     Convert the given non-generic unit options into the generic units version.
@@ -96,7 +95,10 @@ rec {
     }
     ```
   */
-  generateUnits = { units ? { } }@args:
+  generateUnits =
+    {
+      units ? { },
+    }@args:
     pkgs.buildEnv {
       ignoreCollisions = false;
       name = "wrapper-manager-systemd-generated-units";
@@ -237,43 +239,48 @@ rec {
     => "hello-there.service.d/10-override.conf"
     ```
   */
-  mkUnitFileName = suffix: s:
+  mkUnitFileName =
+    suffix: s:
     let
       unitName' = splitUnitFilename s;
       unitName = lib.head unitName';
       overrideName = lib.last unitName';
     in
-      if unitName == overrideName then
-        "${unitName}.${suffix}"
-      else
-        "${unitName}.${suffix}.d/${overrideName}.conf";
+    if unitName == overrideName then
+      "${unitName}.${suffix}"
+    else
+      "${unitName}.${suffix}.d/${overrideName}.conf";
 
   # Internal implementation for creating a unit within wrapper-manager.
   makeUnit =
     name: unit:
-      pkgs.runCommand "unit-${mkPathSafeName name}"
-        {
-          preferLocalBuild = true;
-          allowSubstitutes = false;
-          # unit.text can be null. But variables that are null listed in
-          # passAsFile are ignored by nix, resulting in no file being created,
-          # making the mv operation fail.
-          text = unit.text;
-          passAsFile = [ "text" ];
-        }
-        (''
+    pkgs.runCommand "unit-${mkPathSafeName name}"
+      {
+        preferLocalBuild = true;
+        allowSubstitutes = false;
+        # unit.text can be null. But variables that are null listed in
+        # passAsFile are ignored by nix, resulting in no file being created,
+        # making the mv operation fail.
+        text = unit.text;
+        passAsFile = [ "text" ];
+      }
+      (
+        ''
           name=${shellEscape unit.filename}
           mkdir -p "$out/$(dirname -- "$name")"
           mv "$textPath" "$out/$name"
         ''
         + lib.optionalString unit.enableStatelessInstallation (
           let
-            makeSymlinkScript = suffix: _item: let
-              folderName = shellEscape "${_item}.${suffix}";
-            in ''
-              folderName=${folderName}
-              mkdir -p "$out/$folderName" && ln -sfn ../$name "$out/$folderName/$name"
-            '';
+            makeSymlinkScript =
+              suffix: _item:
+              let
+                folderName = shellEscape "${_item}.${suffix}";
+              in
+              ''
+                folderName=${folderName}
+                mkdir -p "$out/$folderName" && ln -sfn ../$name "$out/$folderName/$name"
+              '';
           in
           ''
             ${lib.concatStrings (
@@ -285,8 +292,9 @@ rec {
             ${lib.concatStrings (builtins.map (makeSymlinkScript "wants") unit.wantedBy)}
             ${lib.concatStrings (builtins.map (makeSymlinkScript "requires") unit.requiredBy)}
             ${lib.concatStrings (builtins.map (makeSymlinkScript "upholds") unit.upheldBy)}
-          '')
-        );
+          ''
+        )
+      );
 
   boolValues = [
     true

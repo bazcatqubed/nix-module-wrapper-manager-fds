@@ -149,11 +149,11 @@ rec {
   */
   splitStringOnce =
     sep: s:
-      let
-        s' = lib.splitString sep s;
-      in
-      if lib.length s' == 1 then
-        s'
-      else
-        [ (lib.head s') ] ++ [ (lib.concatStringsSep sep (lib.drop 1 s')) ];
+    let
+      s' = lib.splitString sep s;
+    in
+    if lib.length s' == 1 then
+      s'
+    else
+      [ (lib.head s') ] ++ [ (lib.concatStringsSep sep (lib.drop 1 s')) ];
 }

@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, pkgs, lib, ... }:
+{
+  config,
+  pkgs,
+  lib,
+  ...
+}:
 
 {
   options.wrapperManagerLibExtra = lib.mkOption {
@@ -32,10 +37,9 @@
 
   config = {
     _module.args = {
-      wrapperManagerLib =
-        (import ../../lib { inherit pkgs; }) // {
-          extra = config.wrapperManagerLibExtra;
-        };
+      wrapperManagerLib = (import ../../lib { inherit pkgs; }) // {
+        extra = config.wrapperManagerLibExtra;
+      };
     };
   };
 }

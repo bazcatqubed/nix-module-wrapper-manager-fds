@@ -21,7 +21,8 @@ in
 
   options.wrapper-manager = {
     enableInstallSystemdUnits =
-      lib.mkEnableOption "install systemd units from wrapper-manager packages" // {
+      lib.mkEnableOption "install systemd units from wrapper-manager packages"
+      // {
         default = true;
       };
   };
@@ -48,10 +49,13 @@ in
         )
 
         (
-          { lib, ... }: {
-            options.enableInstallSystemdUnits = lib.mkEnableOption "install systemd units from wrapper-manager configuration" // {
-              default = cfg.enableInstallSystemdUnits;
-            };
+          { lib, ... }:
+          {
+            options.enableInstallSystemdUnits =
+              lib.mkEnableOption "install systemd units from wrapper-manager configuration"
+              // {
+                default = cfg.enableInstallSystemdUnits;
+              };
           }
         )
       ];
@@ -59,7 +63,8 @@ in
 
     (lib.mkIf (cfg.packages != { }) (
       let
-        filterPackages = cond:
+        filterPackages =
+          cond:
           let
             validPackages = lib.filterAttrs cond cfg.packages;
           in
@@ -68,7 +73,9 @@ in
       {
         environment.systemPackages = filterPackages (_: wrapper: wrapper.enableInstall);
 
-        systemd.packages = filterPackages (_: wrapper: wrapper.enableInstall && wrapper.enableInstallSystemdUnits);
+        systemd.packages = filterPackages (
+          _: wrapper: wrapper.enableInstall && wrapper.enableInstallSystemdUnits
+        );
       }
     ))
   ];

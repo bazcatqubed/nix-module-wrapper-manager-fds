@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   wrappers.yt-dlp-audio = {
@@ -10,10 +15,14 @@
     prependArgs = [
       "--no-overwrite"
       "--extract-audio"
-      "--format" "bestaudio"
-      "--audio-format" "opus"
-      "--output" "'%(album_artists.0,artists.0)s/%(album,playlist)s/%(track_number,playlist_index)d-%(track,title)s.%(ext)s'"
-      "--download-archive" "archive"
+      "--format"
+      "bestaudio"
+      "--audio-format"
+      "opus"
+      "--output"
+      "'%(album_artists.0,artists.0)s/%(album,playlist)s/%(track_number,playlist_index)d-%(track,title)s.%(ext)s'"
+      "--download-archive"
+      "archive"
       "--embed-thumbnail"
       "--add-metadata"
     ];
@@ -25,15 +34,17 @@
   wrappers.yt-dlp-video = {
     arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
     prependArgs = [
-      "--config-location" (builtins.toString pkgs.emptyFile)
+      "--config-location"
+      (builtins.toString pkgs.emptyFile)
     ];
   };
 
   # tag::test[]
   build.extraPassthru.wrapperManagerTests = {
-    actuallyBuilt = let
-      wrapper = config.build.toplevel;
-    in
+    actuallyBuilt =
+      let
+        wrapper = config.build.toplevel;
+      in
       pkgs.runCommand "wrapper-manager-test-wrappers-for-yt-dlp-actually-built" { } ''
         [ -x "${wrapper}/bin/yt-dlp-audio" ] \
         && [ -x "${wrapper}/bin/yt-dlp-video" ] \

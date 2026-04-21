@@ -3,25 +3,37 @@
 # SPDX-License-Identifier: MIT
 
 # systemd-slash-wrapper-manager-fds integration for modular services.
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 let
   cfg = config.environment.services;
 
-  dashen = a: b:
-    if b == "" then a
-    else if a == "" then b
-    else "${a}-${b}";
+  dashen =
+    a: b:
+    if b == "" then
+      a
+    else if a == "" then
+      b
+    else
+      "${a}-${b}";
 
-  makeUnits = unitType: prefix: topLevelServiceCfg:
-  lib.concatMapAttrs (unitName: unitModule: {
-    "${prefix}" = { ... }: {
-      imports = unitModule;
-    };
-  }) topLevelServiceCfg.systemd.${unitType}
-  // lib.concatMapAttrs (subunitName: subservice:
-    makeUnits unitType (dashen prefix subunitName) subservice
-  ) topLevelServiceCfg.services;
+  makeUnits =
+    unitType: prefix: topLevelServiceCfg:
+    lib.concatMapAttrs (unitName: unitModule: {
+      "${prefix}" =
+        { ... }:
+        {
+          imports = unitModule;
+        };
+    }) topLevelServiceCfg.systemd.${unitType}
+    // lib.concatMapAttrs (
+      subunitName: subservice: makeUnits unitType (dashen prefix subunitName) subservice
+    ) topLevelServiceCfg.services;
 in
 {
   environment.sharedServiceModules = [

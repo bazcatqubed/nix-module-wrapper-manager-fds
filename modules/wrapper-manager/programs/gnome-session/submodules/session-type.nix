@@ -2,7 +2,15 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ name, config, pkgs, lib, wrapperManagerLib, settingsFormat, ... }:
+{
+  name,
+  config,
+  pkgs,
+  lib,
+  wrapperManagerLib,
+  settingsFormat,
+  ...
+}:
 
 let
   # For an updated list, see `menu/menu-spec.xml` from
@@ -29,7 +37,8 @@ let
     "Endless"
     "Old"
   ];
-in {
+in
+{
   options = {
     fullName = lib.mkOption {
       type = lib.types.nonEmptyStr;
@@ -54,13 +63,15 @@ in {
       '';
       default = [ config.fullName ];
       defaultText = "[ <session>.fullName ]";
-      apply = names:
-        lib.map (name:
-          if (lib.elem name validDesktopNames) || (lib.hasPrefix "X-" name) then
-            name
-          else
-            "X-${name}") names;
-      example = [ "GNOME" "Garden" ];
+      apply =
+        names:
+        lib.map (
+          name: if (lib.elem name validDesktopNames) || (lib.hasPrefix "X-" name) then name else "X-${name}"
+        ) names;
+      example = [
+        "GNOME"
+        "Garden"
+      ];
     };
 
     description = lib.mkOption {
@@ -69,13 +80,13 @@ in {
         A one-sentence description of the desktop environment.
       '';
       default = "${config.fullName} desktop environment";
-      defaultText =
-        lib.literalExpression "\${<name>.fullName} desktop environment";
+      defaultText = lib.literalExpression "\${<name>.fullName} desktop environment";
       example = "A desktop environment featuring a scrolling compositor.";
     };
 
     components = lib.mkOption {
-      type = with lib.types;
+      type =
+        with lib.types;
         attrsOf (submoduleWith {
           specialArgs = {
             inherit wrapperManagerLib pkgs;
@@ -118,7 +129,10 @@ in {
         configuration.
         :::
       '';
-      example = [ "--systemd" "--disable-acceleration-check" ];
+      example = [
+        "--systemd"
+        "--disable-acceleration-check"
+      ];
     };
 
     settings = lib.mkOption {
@@ -159,8 +173,7 @@ in {
         customized version of GNOME.
         :::
       '';
-      default =
-        lib.mapAttrsToList (_: component: component.id) config.components;
+      default = lib.mapAttrsToList (_: component: component.id) config.components;
       example = [
         "org.gnome.Shell"
         "org.gnome.SettingsDaemon.A11ySettings"
@@ -174,7 +187,12 @@ in {
         type = lib.types.submodule (
           wrapperManagerLib.systemd.submodules.targets
           ++ [
-            ({ lib, ... }: { _module.args.name = lib.mkForce "gnome-session@${name}/session"; })
+            (
+              { lib, ... }:
+              {
+                _module.args.name = lib.mkForce "gnome-session@${name}/session";
+              }
+            )
           ]
         );
         description = ''
@@ -210,8 +228,7 @@ in {
     extraArgs = [ "--session=${name}" ];
 
     systemd.targetUnit = {
-      wants = lib.mkDefault
-        (lib.map (c: "${c}.target") config.requiredComponents);
+      wants = lib.mkDefault (lib.map (c: "${c}.target") config.requiredComponents);
     };
 
     settings."GNOME Session" = {

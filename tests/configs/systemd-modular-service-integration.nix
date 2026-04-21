@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   environment.services = {
@@ -35,22 +40,22 @@
         wrapper = config.build.toplevel;
         systemdDir = "${wrapper}/etc/systemd";
       in
-        pkgs.runCommand "wrapper-manager-systemd-automount-and-mount-units-actually-built" { } ''
-          [ -x "${wrapper}/bin/ghostunnel-baz" ] \
-          && [ -x "${wrapper}/bin/ghostunnel-fds" ] \
-          && [ -f "${systemdDir}/system/ghostunnel-baz.service" ] \
-          && [ -f "${systemdDir}/system/ghostunnel-fds.service" ] \
-          && touch $out
-        '';
+      pkgs.runCommand "wrapper-manager-systemd-automount-and-mount-units-actually-built" { } ''
+        [ -x "${wrapper}/bin/ghostunnel-baz" ] \
+        && [ -x "${wrapper}/bin/ghostunnel-fds" ] \
+        && [ -f "${systemdDir}/system/ghostunnel-baz.service" ] \
+        && [ -f "${systemdDir}/system/ghostunnel-fds.service" ] \
+        && touch $out
+      '';
 
     checkMetadata =
       let
         inherit (config.programs) systemd;
       in
-        lib.optionalAttrs (
-          systemd.system.services."ghostunnel-baz".name == "ghostunnel-baz.service"
-          && systemd.system.services."ghostunnel-fds".name == "ghostunnel-fds.service"
-        ) pkgs.emptyFile;
+      lib.optionalAttrs (
+        systemd.system.services."ghostunnel-baz".name == "ghostunnel-baz.service"
+        && systemd.system.services."ghostunnel-fds".name == "ghostunnel-fds.service"
+      ) pkgs.emptyFile;
   };
   # end::test[]
 }

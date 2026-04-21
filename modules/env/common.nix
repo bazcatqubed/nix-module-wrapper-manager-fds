@@ -38,7 +38,8 @@ let
           };
         }
       )
-    ] ++ cfg.sharedModules;
+    ]
+    ++ cfg.sharedModules;
   };
 in
 {

@@ -126,6 +126,7 @@ rec {
         # this.
         "${pkgs.path}/nixos/modules/misc/assertions.nix"
         "${pkgs.path}/nixos/modules/misc/meta.nix"
-      ] ++ modules;
+      ]
+      ++ modules;
     };
 }

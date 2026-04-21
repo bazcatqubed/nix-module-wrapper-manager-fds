@@ -2,7 +2,13 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, wrapperManagerLib, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  wrapperManagerLib,
+  ...
+}:
 
 let
   cfg = config.programs.gnome-session;
@@ -149,93 +155,103 @@ in
           };
         }
       '';
-      type = with lib.types; attrsOf (submoduleWith {
-        modules = [
-          ./submodules/session-type.nix
+      type =
+        with lib.types;
+        attrsOf (submoduleWith {
+          modules = [
+            ./submodules/session-type.nix
 
-          ({ lib, ... }: {
-            options.enable = lib.mkEnableOption null // {
-              default = true;
-              description = ''
-                Whether to enable generating the files for a
-                `gnome-session`-configured custom desktop session.
-              '';
-            };
-          })
-        ];
-        shorthandOnlyDefinesConfig = true;
-        specialArgs = {
-          inherit settingsFormat wrapperManagerLib pkgs;
-        };
-      });
+            (
+              { lib, ... }:
+              {
+                options.enable = lib.mkEnableOption null // {
+                  default = true;
+                  description = ''
+                    Whether to enable generating the files for a
+                    `gnome-session`-configured custom desktop session.
+                  '';
+                };
+              }
+            )
+          ];
+          shorthandOnlyDefinesConfig = true;
+          specialArgs = {
+            inherit settingsFormat wrapperManagerLib pkgs;
+          };
+        });
     };
   };
 
-  config = lib.mkIf (cfg.sessions != { }) (let
-    validSessions = lib.filterAttrs (_: v: v.enable) cfg.sessions;
-  in {
-    build.extraPassthru.providedSessions =
-      lib.mapAttrsToList (name: _: name) validSessions;
+  config = lib.mkIf (cfg.sessions != { }) (
+    let
+      validSessions = lib.filterAttrs (_: v: v.enable) cfg.sessions;
+    in
+    {
+      build.extraPassthru.providedSessions = lib.mapAttrsToList (name: _: name) validSessions;
 
-    xdg.desktopEntries =
-      let
-        mkComponentEntry = _: component:
-          lib.nameValuePair component.id component.desktopEntrySettings;
+      xdg.desktopEntries =
+        let
+          mkComponentEntry = _: component: lib.nameValuePair component.id component.desktopEntrySettings;
 
-        mkSessionComponentDesktopEntries = _: session:
-          lib.mapAttrs' mkComponentEntry session.components;
-      in
-      lib.concatMapAttrs mkSessionComponentDesktopEntries validSessions;
+          mkSessionComponentDesktopEntries = _: session: lib.mapAttrs' mkComponentEntry session.components;
+        in
+        lib.concatMapAttrs mkSessionComponentDesktopEntries validSessions;
 
-    files =
-      let
-        mkSessionFiles = name: session: {
-          "/share/wayland-sessions/${name}.desktop".text = ''
-            [Desktop Entry]
-            Name=${session.fullName}
-            Comment=${session.description}
-            Exec=${config.files."/libexec/${name}-session".source}
-            Type=Application
-            DesktopNames=${lib.concatStringsSep ";" session.desktopNames}
-          '';
-
-          "/share/gnome-session/sessions/${name}.session".source =
-            settingsFormat.generate "session-${name}" session.settings;
-
-          "/libexec/${name}-session" = {
-            text = ''
-              #!${pkgs.runtimeShell}
-
-              ${lib.getExe' cfg.package "gnome-session"} ${
-                lib.escapeShellArgs session.extraArgs
-              }
+      files =
+        let
+          mkSessionFiles = name: session: {
+            "/share/wayland-sessions/${name}.desktop".text = ''
+              [Desktop Entry]
+              Name=${session.fullName}
+              Comment=${session.description}
+              Exec=${config.files."/libexec/${name}-session".source}
+              Type=Application
+              DesktopNames=${lib.concatStringsSep ";" session.desktopNames}
             '';
-            mode = "0755";
+
+            "/share/gnome-session/sessions/${name}.session".source =
+              settingsFormat.generate "session-${name}" session.settings;
+
+            "/libexec/${name}-session" = {
+              text = ''
+                #!${pkgs.runtimeShell}
+
+                ${lib.getExe' cfg.package "gnome-session"} ${lib.escapeShellArgs session.extraArgs}
+              '';
+              mode = "0755";
+            };
           };
-        };
-      in
-      lib.concatMapAttrs mkSessionFiles validSessions;
+        in
+        lib.concatMapAttrs mkSessionFiles validSessions;
 
-    programs.systemd.user.units =
-      let
-        inherit (wrapperManagerLib.systemd) intoUnit;
-        mkSessionComponentUnits = _: component: {
-          "${component.id}.service" = intoUnit component.systemd.serviceUnit;
-          "${component.id}.target" = intoUnit component.systemd.targetUnit;
-        } // lib.optionalAttrs (component.systemd.pathUnit != null) {
-          "${component.id}.path" = intoUnit component.systemd.pathUnit;
-        } // lib.optionalAttrs (component.systemd.socketUnit != null) {
-          "${component.id}.socket" = intoUnit component.systemd.socketUnit;
-        } // lib.optionalAttrs (component.systemd.timerUnit != null) {
-          "${component.id}.timer" = intoUnit component.systemd.timerUnit;
-        };
+      programs.systemd.user.units =
+        let
+          inherit (wrapperManagerLib.systemd) intoUnit;
+          mkSessionComponentUnits =
+            _: component:
+            {
+              "${component.id}.service" = intoUnit component.systemd.serviceUnit;
+              "${component.id}.target" = intoUnit component.systemd.targetUnit;
+            }
+            // lib.optionalAttrs (component.systemd.pathUnit != null) {
+              "${component.id}.path" = intoUnit component.systemd.pathUnit;
+            }
+            // lib.optionalAttrs (component.systemd.socketUnit != null) {
+              "${component.id}.socket" = intoUnit component.systemd.socketUnit;
+            }
+            // lib.optionalAttrs (component.systemd.timerUnit != null) {
+              "${component.id}.timer" = intoUnit component.systemd.timerUnit;
+            };
 
-        mkSystemdUnitSet = _: session:
-          {
-            "${session.systemd.targetUnit.filename}" = wrapperManagerLib.systemd.intoUnit session.systemd.targetUnit;
-          }
-          // (lib.concatMapAttrs mkSessionComponentUnits session.components);
-      in
-      lib.concatMapAttrs mkSystemdUnitSet validSessions;
-  });
+          mkSystemdUnitSet =
+            _: session:
+            {
+              "${session.systemd.targetUnit.filename}" =
+                wrapperManagerLib.systemd.intoUnit session.systemd.targetUnit;
+            }
+            // (lib.concatMapAttrs mkSessionComponentUnits session.components);
+        in
+        lib.concatMapAttrs mkSystemdUnitSet validSessions;
+    }
+  );
 }

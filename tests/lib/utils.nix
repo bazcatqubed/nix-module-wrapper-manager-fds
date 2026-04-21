@@ -55,12 +55,18 @@ lib.runTests {
 
   testsUtilsSplitStringOnce = {
     expr = self.utils.splitStringOnce "/" "foodogsquared/hello/there";
-    expected = [ "foodogsquared" "hello/there" ];
+    expected = [
+      "foodogsquared"
+      "hello/there"
+    ];
   };
 
   testsUtilsSplitStringOnce2 = {
     expr = self.utils.splitStringOnce "/" "foo@.service/10-hello.conf";
-    expected = [ "foo@.service" "10-hello.conf" ];
+    expected = [
+      "foo@.service"
+      "10-hello.conf"
+    ];
   };
 
   testsUtilsSplitStringOnce3 = {

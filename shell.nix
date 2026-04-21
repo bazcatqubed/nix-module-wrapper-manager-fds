@@ -26,16 +26,18 @@ pkgs.mkShell {
     nodejs
     prettier
     vscode-langservers-extracted
-    (vale.withStyles (p: with p; [
-      proselint
-      readability
-    ]))
+    (vale.withStyles (
+      p: with p; [
+        proselint
+        readability
+      ]
+    ))
     vale-ls
     asciidoctor-with-extensions
 
     npins
     treefmt
-    nixfmt-rfc-style
+    nixfmt
     nixdoc
 
     # For easy validation of the test suite.

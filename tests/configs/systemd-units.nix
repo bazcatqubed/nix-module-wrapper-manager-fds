@@ -2,7 +2,12 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ config, lib, pkgs, ... }:
+{
+  config,
+  lib,
+  pkgs,
+  ...
+}:
 
 {
   programs.systemd.system.services = {
@@ -20,7 +25,10 @@
       aliases = [ "whut-whut.service" ];
       wantedBy = [ "graphical.target" ];
       requiredBy = [ "multi-user.target" ];
-      upheldBy = [ "default.target" "basic.target" ];
+      upheldBy = [
+        "default.target"
+        "basic.target"
+      ];
       description = "EEEEEEEEeeeeeeehhh.....";
     };
 
@@ -31,13 +39,19 @@
       aliases = [ "whut-whut.service" ];
       wantedBy = [ "graphical.target" ];
       requiredBy = [ "multi-user.target" ];
-      upheldBy = [ "default.target" "basic.target" ];
+      upheldBy = [
+        "default.target"
+        "basic.target"
+      ];
       description = "EEEEEEEEeeeeeeehhh.....";
     };
 
     "there/10-hello" = {
       description = "wrapper-manager systemd service override example";
-      wantedBy = [ "graphical.target" "gnome-session@sample.target" ];
+      wantedBy = [
+        "graphical.target"
+        "gnome-session@sample.target"
+      ];
     };
 
     "there/20-hello-again" = {
@@ -46,7 +60,10 @@
 
     service-with-custom-sections = {
       description = "wrapper-manager systemd unit with custom sections";
-      wantedBy = [ "graphical.target" "gnome-session@sample.target" ];
+      wantedBy = [
+        "graphical.target"
+        "gnome-session@sample.target"
+      ];
       extraSectionsConfig = {
         "Custom Section" = {
           Hello = "there";
@@ -93,11 +110,9 @@
 
   # An override drop-in target unit.
   programs.systemd.user.targets."gnome-session@one.foodogsquared.HorizontalHunger/session" = {
-    wants = let
-      gsdComponents =
-        lib.map
-        (gsdc: "org.gnome.SettingsDaemon.${gsdc}")
-        [
+    wants =
+      let
+        gsdComponents = lib.map (gsdc: "org.gnome.SettingsDaemon.${gsdc}") [
           "A11ySettings"
           "Color"
           "Housekeeping"
@@ -107,7 +122,7 @@
           "Wacom"
           "XSettings"
         ];
-    in
+      in
       lib.map (n: "${n}.target") (gsdComponents ++ [ "org.gnome.Shell" ]);
     requires = [ "org.gnome.Shell.target" ];
   };
@@ -115,7 +130,10 @@
   programs.systemd.user.services = {
     hello = {
       description = "Greeting service";
-      path = with pkgs; [ hello hello-go ];
+      path = with pkgs; [
+        hello
+        hello-go
+      ];
       script = ''
         hello
       '';
@@ -146,9 +164,10 @@
       };
     };
 
-    "gnome-session-manager@one.foodogsquared.HorizontalHunger/10-gnome-session-wrapper-manager-override" = {
-      description = "Another override unit";
-    };
+    "gnome-session-manager@one.foodogsquared.HorizontalHunger/10-gnome-session-wrapper-manager-override" =
+      {
+        description = "Another override unit";
+      };
   };
 
   # tag::test[]
@@ -182,13 +201,15 @@
       let
         inherit (config.programs) systemd;
       in
-        lib.optionalAttrs (
-          systemd.system.services."there/10-hello".name == "there.service"
-          && systemd.system.services."hello".name == "hello.service"
-          && systemd.system.services."there/20-hello-again".name == "there.service"
-          && systemd.user.services."gnome-session-manager@".name == "gnome-session-manager@.service"
-          && systemd.user.services."gnome-session-manager@one.foodogsquared.HorizontalHunger/10-gnome-session-wrapper-manager-override".name == "gnome-session-manager@one.foodogsquared.HorizontalHunger.service"
-        ) pkgs.emptyFile;
+      lib.optionalAttrs (
+        systemd.system.services."there/10-hello".name == "there.service"
+        && systemd.system.services."hello".name == "hello.service"
+        && systemd.system.services."there/20-hello-again".name == "there.service"
+        && systemd.user.services."gnome-session-manager@".name == "gnome-session-manager@.service"
+        &&
+          systemd.user.services."gnome-session-manager@one.foodogsquared.HorizontalHunger/10-gnome-session-wrapper-manager-override".name
+          == "gnome-session-manager@one.foodogsquared.HorizontalHunger.service"
+      ) pkgs.emptyFile;
   };
   # end::test[]
 }

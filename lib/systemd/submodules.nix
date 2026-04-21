@@ -53,12 +53,15 @@ let
     timerOptions
     ;
 
-  sharedExecConfig = cfg: { config, lib, ... }: {
-    config = {
-      enableStrictShellChecks = lib.mkOptionDefault cfg.programs.systemd.enableStrictShellChecks;
-      enableCommonDependencies = lib.mkOptionDefault cfg.programs.systemd.enableCommonDependencies;
+  sharedExecConfig =
+    cfg:
+    { config, lib, ... }:
+    {
+      config = {
+        enableStrictShellChecks = lib.mkOptionDefault cfg.programs.systemd.enableStrictShellChecks;
+        enableCommonDependencies = lib.mkOptionDefault cfg.programs.systemd.enableCommonDependencies;
+      };
     };
-  };
 
   sharedUnitConfig = cfg: {
     config = {
@@ -71,7 +74,12 @@ rec {
     List of modules associated for {option}`programs.systemd.$VARIANT.units`.
   */
   units = lib.singleton (
-    { name, config, lib, ... }:
+    {
+      name,
+      config,
+      lib,
+      ...
+    }:
     {
       options = sharedOptions // {
         text = lib.mkOption {
@@ -101,12 +109,15 @@ rec {
     commonUnitOptions
     serviceOptions
 
-    ({ name, ... }: {
-      config = {
-        name = "${getUnitName name}.service";
-        filename = mkUnitFileName "service" name;
-      };
-    })
+    (
+      { name, ... }:
+      {
+        config = {
+          name = "${getUnitName name}.service";
+          filename = mkUnitFileName "service" name;
+        };
+      }
+    )
   ];
 
   /**
@@ -136,7 +147,8 @@ rec {
     }
     ```
   */
-  services' = cfg:
+  services' =
+    cfg:
     services
     ++ [
       (sharedExecConfig cfg)
@@ -148,12 +160,15 @@ rec {
   */
   targets = [
     commonUnitOptions
-    ({ name, ... }: {
-      config = {
-        name = "${getUnitName name}.target";
-        filename = mkUnitFileName "target" name;
-      };
-    })
+    (
+      { name, ... }:
+      {
+        config = {
+          name = "${getUnitName name}.target";
+          filename = mkUnitFileName "target" name;
+        };
+      }
+    )
   ];
 
   /**
@@ -183,7 +198,8 @@ rec {
     }
     ```
   */
-  targets' = cfg:
+  targets' =
+    cfg:
     targets
     ++ [
       (sharedUnitConfig cfg)
@@ -195,12 +211,15 @@ rec {
   sockets = [
     commonUnitOptions
     socketOptions
-    ({ name, ... }: {
-      config = {
-        name = "${getUnitName name}.socket";
-        filename = mkUnitFileName "socket" name;
-      };
-    })
+    (
+      { name, ... }:
+      {
+        config = {
+          name = "${getUnitName name}.socket";
+          filename = mkUnitFileName "socket" name;
+        };
+      }
+    )
   ];
 
   /**
@@ -230,7 +249,8 @@ rec {
     }
     ```
   */
-  sockets' = cfg:
+  sockets' =
+    cfg:
     sockets
     ++ [
       (sharedExecConfig cfg)
@@ -243,12 +263,15 @@ rec {
   timers = [
     commonUnitOptions
     timerOptions
-    ({ name, ... }: {
-      config = {
-        name = "${getUnitName name}.timer";
-        filename = mkUnitFileName "timer" name;
-      };
-    })
+    (
+      { name, ... }:
+      {
+        config = {
+          name = "${getUnitName name}.timer";
+          filename = mkUnitFileName "timer" name;
+        };
+      }
+    )
   ];
 
   /**
@@ -278,7 +301,8 @@ rec {
     }
     ```
   */
-  timers' = cfg:
+  timers' =
+    cfg:
     timers
     ++ [
       (sharedUnitConfig cfg)
@@ -290,12 +314,15 @@ rec {
   paths = [
     commonUnitOptions
     pathOptions
-    ({ name, ... }: {
-      config = {
-        name = "${getUnitName name}.path";
-        filename = mkUnitFileName "path" name;
-      };
-    })
+    (
+      { name, ... }:
+      {
+        config = {
+          name = "${getUnitName name}.path";
+          filename = mkUnitFileName "path" name;
+        };
+      }
+    )
   ];
 
   /**
@@ -325,7 +352,8 @@ rec {
     }
     ```
   */
-  paths' = cfg:
+  paths' =
+    cfg:
     paths
     ++ [
       (sharedUnitConfig cfg)
@@ -337,12 +365,15 @@ rec {
   slices = [
     commonUnitOptions
     sliceOptions
-    ({ name, ... }: {
-      config = {
-        name = "${getUnitName name}.slice";
-        filename = mkUnitFileName "slice" name;
-      };
-    })
+    (
+      { name, ... }:
+      {
+        config = {
+          name = "${getUnitName name}.slice";
+          filename = mkUnitFileName "slice" name;
+        };
+      }
+    )
   ];
 
   /**
@@ -372,7 +403,8 @@ rec {
     }
     ```
   */
-  slices' = cfg:
+  slices' =
+    cfg:
     slices
     ++ [
       (sharedUnitConfig cfg)
@@ -384,14 +416,16 @@ rec {
   mounts = [
     commonUnitOptions
     mountOptions
-    ({ config, lib, ... }: let
-      name = escapeSystemdPath config.where;
-    in {
-      config = {
-        name = "${getUnitName name}.mount";
-        filename = mkUnitFileName "mount" name;
-        mountConfig =
-          {
+    (
+      { config, lib, ... }:
+      let
+        name = escapeSystemdPath config.where;
+      in
+      {
+        config = {
+          name = "${getUnitName name}.mount";
+          filename = mkUnitFileName "mount" name;
+          mountConfig = {
             What = config.what;
             Where = config.where;
           }
@@ -401,8 +435,9 @@ rec {
           // lib.optionalAttrs (config.options != "") {
             Options = config.options;
           };
-      };
-    })
+        };
+      }
+    )
   ];
 
   /**
@@ -432,7 +467,8 @@ rec {
     }
     ```
   */
-  mounts' = cfg:
+  mounts' =
+    cfg:
     mounts
     ++ [
       (sharedUnitConfig cfg)
@@ -444,17 +480,21 @@ rec {
   automounts = [
     commonUnitOptions
     automountOptions
-    ({ config, lib, ... }: let
-      name = escapeSystemdPath config.where;
-    in {
-      config = {
-        name = "${getUnitName name}.automount";
-        filename = mkUnitFileName "automount" name;
-        automountConfig = {
-          Where = config.where;
+    (
+      { config, lib, ... }:
+      let
+        name = escapeSystemdPath config.where;
+      in
+      {
+        config = {
+          name = "${getUnitName name}.automount";
+          filename = mkUnitFileName "automount" name;
+          automountConfig = {
+            Where = config.where;
+          };
         };
-      };
-    })
+      }
+    )
   ];
 
   /**
@@ -484,7 +524,8 @@ rec {
     }
     ```
   */
-  automounts' = cfg:
+  automounts' =
+    cfg:
     automounts
     ++ [
       (sharedUnitConfig cfg)

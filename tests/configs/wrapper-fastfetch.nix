@@ -43,13 +43,11 @@
         && touch $out
       '';
 
-      checkMetadata =
-        let
-          wrapper = config.build.toplevel;
-        in
-        lib.optionalAttrs (
-          wrapper.name == config.build.drvName
-          ) pkgs.emptyFile;
+    checkMetadata =
+      let
+        wrapper = config.build.toplevel;
+      in
+      lib.optionalAttrs (wrapper.name == config.build.drvName) pkgs.emptyFile;
   };
   # end::test[]
 }

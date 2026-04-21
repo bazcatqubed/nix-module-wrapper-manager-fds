@@ -11,12 +11,17 @@ in
 
 let
   wmLib = (import ../../. { }).lib;
-  build = args: wmLib.build (args // {
-    inherit pkgs;
-    modules = args.modules or [ ] ++ [
-      ../../modules/wrapper-manager/modular-services.nix
-    ];
-  });
+  build =
+    args:
+    wmLib.build (
+      args
+      // {
+        inherit pkgs;
+        modules = args.modules or [ ] ++ [
+          ../../modules/wrapper-manager/modular-services.nix
+        ];
+      }
+    );
 
   buildConfig = file: build { modules = [ file ]; };
 in

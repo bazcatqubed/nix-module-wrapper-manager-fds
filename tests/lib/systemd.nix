@@ -2,7 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, lib, self }:
+{
+  pkgs,
+  lib,
+  self,
+}:
 
 lib.runTests {
   testMakeUnitFilename = {
@@ -38,12 +42,18 @@ lib.runTests {
   # Well, this is supposed to be a naive function.
   testSplitUnitFilenameWithDropIn = {
     expr = self.systemd.splitUnitFilename "hello-there.service.d/10-this-is-a-dropin-unit.conf";
-    expected = [ "hello-there.service.d" "10-this-is-a-dropin-unit.conf" ];
+    expected = [
+      "hello-there.service.d"
+      "10-this-is-a-dropin-unit.conf"
+    ];
   };
 
   testSplitUnitFilenameWithDropInAndInstance = {
     expr = self.systemd.splitUnitFilename "service-with-instance@world.service.d/whats-my-age-again.conf";
-    expected = [ "service-with-instance@world.service.d" "whats-my-age-again.conf" ];
+    expected = [
+      "service-with-instance@world.service.d"
+      "whats-my-age-again.conf"
+    ];
   };
 
   # This one, too.

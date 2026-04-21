@@ -2,7 +2,11 @@
 #
 # SPDX-License-Identifier: MIT
 
-{ pkgs, lib, self }:
+{
+  pkgs,
+  lib,
+  self,
+}:
 
 {
   /**
@@ -51,7 +55,8 @@
     ''
     ```
   */
-  toSystemdINI = attrsOfSections:
+  toSystemdINI =
+    attrsOfSections:
     let
       mkSectionName = (name: lib.escape [ "[" "]" ] name);
 
@@ -68,11 +73,13 @@
       mkSection =
         sectName: sectValues:
         if lib.isList sectValues then
-          lib.concatMapStringsSep "\n"
-            (v: ''
+          lib.concatMapStringsSep "\n" (
+            v:
+            ''
               [${mkSectionName sectName}]
             ''
-            + toKeyValue v) sectValues
+            + toKeyValue v
+          ) sectValues
         else
           ''
             [${mkSectionName sectName}]

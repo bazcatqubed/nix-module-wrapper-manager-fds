@@ -73,7 +73,8 @@ let
     modules = [
       ../modules/wrapper-manager
       ../modules/wrapper-manager/modular-services.nix
-    ] ++ extraModules;
+    ]
+    ++ extraModules;
     includeModuleSystemOptions = true;
   };
   wmNixosDoc = evalDoc { modules = [ ../modules/env/nixos ]; };
@@ -108,74 +109,80 @@ in
       docsRootDir = "docs/website";
       docsRootModule = "${docsRootDir}/modules/ROOT";
     in
-      buildAntoraSite (finalAttrs: {
-        pname = "wrapper-manager-docs";
-        version = "2025-05-31";
-        modHash = "sha256-mhq2RmUQKMkXm+ATD3FOz/Y8IlS6ntBQiPQR63ZAg6I=";
-        modRoot = "${finalAttrs.src}/docs/website";
+    buildAntoraSite (finalAttrs: {
+      pname = "wrapper-manager-docs";
+      version = "2025-05-31";
+      modHash = "sha256-mhq2RmUQKMkXm+ATD3FOz/Y8IlS6ntBQiPQR63ZAg6I=";
+      modRoot = "${finalAttrs.src}/docs/website";
 
-        src = lib.cleanSourceWith {
-          src = ../.;
-          filter = name: type:
-            let
-              baseName = baseNameOf (toString name);
-            in
-            !(
-              # Filter out editor backup / swap files.
-              lib.hasSuffix "~" baseName
-              || builtins.match "^\\.sw[a-z]$" baseName != null
-              || builtins.match "^\\..*\\.sw[a-z]$" baseName != null
+      src = lib.cleanSourceWith {
+        src = ../.;
+        filter =
+          name: type:
+          let
+            baseName = baseNameOf (toString name);
+          in
+          !(
+            # Filter out editor backup / swap files.
+            lib.hasSuffix "~" baseName
+            || builtins.match "^\\.sw[a-z]$" baseName != null
+            || builtins.match "^\\..*\\.sw[a-z]$" baseName != null
 
-              # Filter all of the development-related thingies.
-              || baseName == "node_modules"
-              || baseName == ".direnv"
-              || baseName == ".envrc"
-              || baseName == ".github"
-              ||
+            # Filter all of the development-related thingies.
+            || baseName == "node_modules"
+            || baseName == ".direnv"
+            || baseName == ".envrc"
+            || baseName == ".github"
+            ||
 
               # Filter out generates files.
               lib.hasSuffix ".o" baseName
-              || lib.hasSuffix ".so" baseName
-              ||
+            || lib.hasSuffix ".so" baseName
+            ||
               # Filter out nix-build result symlinks
               (type == "symlink" && lib.hasPrefix "result" baseName)
-              ||
+            ||
               # Filter out sockets and other types of files we can't have in the store.
               (type == "unknown")
-            );
-        };
-        playbookFile = "site.yml";
+          );
+      };
+      playbookFile = "site.yml";
 
-        nativeBuildInputs = with pkgs; [ kramdown-asciidoc ];
+      nativeBuildInputs = with pkgs; [ kramdown-asciidoc ];
 
-        preBuild = ''
-          cat ${wmOptionsDoc.optionsAsciiDoc} | tee -a "${docsRootModule}/pages/wm-options.adoc" >/dev/null
-          cat ${wmNixosDoc.optionsAsciiDoc} | tee -a "${docsRootModule}/pages/wm-nixos-options.adoc" >/dev/null
-          cat ${wmHmDoc.optionsAsciiDoc} | tee -a "${docsRootModule}/pages/wm-hm-options.adoc" >/dev/null
+      preBuild = ''
+        cat ${wmOptionsDoc.optionsAsciiDoc} | tee -a "${docsRootModule}/pages/wm-options.adoc" >/dev/null
+        cat ${wmNixosDoc.optionsAsciiDoc} | tee -a "${docsRootModule}/pages/wm-nixos-options.adoc" >/dev/null
+        cat ${wmHmDoc.optionsAsciiDoc} | tee -a "${docsRootModule}/pages/wm-hm-options.adoc" >/dev/null
 
-          {
-            echo '* Library set' | tee -a "${docsRootModule}/nav.adoc" >/dev/null
-            mkdir -p "${docsRootModule}/pages/wm-lib"
-            for i in ${wmLibNixdocs}/*.md; do
-              name=$(basename --suffix=".md" "$i")
-              kramdoc "$i" -o "${docsRootModule}/pages/wm-lib/$name.adoc" --attribute=page-toclevels=1 --auto-ids --lazy-ids && {
-                echo "** xref:wm-lib/$name.adoc[]" | tee -a "${docsRootModule}/nav.adoc" >/dev/null
-              }
-            done
+        {
+          echo '* Library set' | tee -a "${docsRootModule}/nav.adoc" >/dev/null
+          mkdir -p "${docsRootModule}/pages/wm-lib"
+          for i in ${wmLibNixdocs}/*.md; do
+            name=$(basename --suffix=".md" "$i")
+            kramdoc "$i" -o "${docsRootModule}/pages/wm-lib/$name.adoc" --attribute=page-toclevels=1 --auto-ids --lazy-ids && {
+              echo "** xref:wm-lib/$name.adoc[]" | tee -a "${docsRootModule}/nav.adoc" >/dev/null
+            }
+          done
 
-            # Make the ID attribute more explicitly defined since it is
-            # interpreted as something else.
-            sed -i -E 's|^\[#|[id=|' ${docsRootModule}/pages/wm-lib/*.adoc
-          }
-        '';
+          # Make the ID attribute more explicitly defined since it is
+          # interpreted as something else.
+          sed -i -E 's|^\[#|[id=|' ${docsRootModule}/pages/wm-lib/*.adoc
+        }
+      '';
 
-        uiBundle = pkgs.fetchurl {
-          url = "https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable";
-          hash = "sha256-9m+ljvJAv0LCXzBDJwpWJ63fjvOZI/gPaiZSG2Le5LI=";
-        };
-      });
+      uiBundle = pkgs.fetchurl {
+        url = "https://gitlab.com/antora/antora-ui-default/-/jobs/artifacts/HEAD/raw/build/ui-bundle.zip?job=bundle-stable";
+        hash = "sha256-9m+ljvJAv0LCXzBDJwpWJ63fjvOZI/gPaiZSG2Le5LI=";
+      };
+    });
 
-  inherit wmOptionsDoc wmHmDoc wmNixosDoc wmLibNixdocs;
+  inherit
+    wmOptionsDoc
+    wmHmDoc
+    wmNixosDoc
+    wmLibNixdocs
+    ;
 
   inherit releaseConfig;
   outputs = {
@@ -200,38 +207,41 @@ in
     # Take note we'll build all of the supported wider-scoped environments in
     # one derivation and we'll just override it with a `postBuild` in case
     # we need to modify it.
-    manpageCommonEnv = let
-      makeOptionsManpage = {
-        envName,
-        optionsDoc,
-        envNameAllCaps ? lib.strings.toUpper envName,
-        envFormalName ? envName,
-        manpageName ? "wrapper-manager-${envName}-configuration"
-      }:
-        ''
-          asciidoctor --attribute nix-module-env=${envName} --attribute nix-module-env-all-caps=${envNameAllCaps} \
-            --attribute nix-module-env-formal-name=${envFormalName} --backend manpage \
-            ${./manpages/header-common-env.adoc} --out-file header-nixos.5
-          nixos-render-docs options manpage --revision ${releaseConfig.version} \
-            --header ./header-nixos.5 --footer ${./manpages/footer.5} \
-            ${optionsDoc.optionsJSON}/share/doc/nixos/options.json \
-            $out/share/man/man5/${manpageName}.nix.5
-        '';
-
-      makeManpageDrv = manpageGenerationOptions:
-        pkgs.runCommand "wrapper-manager-common-env-manpage"
+    manpageCommonEnv =
+      let
+        makeOptionsManpage =
           {
-            nativeBuildInputs = with pkgs; [
-              nixos-render-docs
-              asciidoctor-with-extensions
-            ];
-          }
+            envName,
+            optionsDoc,
+            envNameAllCaps ? lib.strings.toUpper envName,
+            envFormalName ? envName,
+            manpageName ? "wrapper-manager-${envName}-configuration",
+          }:
           ''
-            mkdir -p $out/share/man/man5
-
-            ${makeOptionsManpage manpageGenerationOptions}
+            asciidoctor --attribute nix-module-env=${envName} --attribute nix-module-env-all-caps=${envNameAllCaps} \
+              --attribute nix-module-env-formal-name=${envFormalName} --backend manpage \
+              ${./manpages/header-common-env.adoc} --out-file header-nixos.5
+            nixos-render-docs options manpage --revision ${releaseConfig.version} \
+              --header ./header-nixos.5 --footer ${./manpages/footer.5} \
+              ${optionsDoc.optionsJSON}/share/doc/nixos/options.json \
+              $out/share/man/man5/${manpageName}.nix.5
           '';
-    in
+
+        makeManpageDrv =
+          manpageGenerationOptions:
+          pkgs.runCommand "wrapper-manager-common-env-manpage"
+            {
+              nativeBuildInputs = with pkgs; [
+                nixos-render-docs
+                asciidoctor-with-extensions
+              ];
+            }
+            ''
+              mkdir -p $out/share/man/man5
+
+              ${makeOptionsManpage manpageGenerationOptions}
+            '';
+      in
       {
         nixos = makeManpageDrv {
           envName = "nixos";
