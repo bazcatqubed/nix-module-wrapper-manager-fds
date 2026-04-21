@@ -368,13 +368,13 @@ For its library set, it makes use of the nixpkgs library and a JSON schema to va
 To make use of it, just run the following commands.
 
 * For flake users, you can run `nix flake check`.
-* For non-flake users, you can do the same with `nix-build tests/ -A lib` or `nix build -f tests/ lib`.
+* For non-flake users, you can do the same with `nix-build tests/ -A results.lib` or `nix build -f tests/ results.lib`.
 
 There is also a test suite for different types of wrapper-manager configurations at
 ifdef::env-antora[github:{github-full}[test directory, rev=main, path=tests/configs]]
 ifndef::env-antora[link:./tests/configs[`./tests/configs`]]
 from the source code.
-You can check them the same way as before (e.g., it's the same for flake-using contributors, `nix-build tests/ -A configs` for non-flake-using contributors).
+You can check them the same way as before (e.g., it's the same for flake-using contributors, `nix-build tests/ -A results.configs` for non-flake-using contributors).
 
 The derivation output should be successfully built if all of the tests in the suite passes.
 Otherwise, it should fail and you'll have to see the build log containing all of the tests that failed.

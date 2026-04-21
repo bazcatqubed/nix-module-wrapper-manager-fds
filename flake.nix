@@ -65,8 +65,9 @@
         };
 
         checks = {
-          inherit (tests) lib;
-        } // lib.mapAttrs' (n: v: lib.nameValuePair "config-test-${n}" v) tests.configs
+          inherit (tests.results) lib;
+        }
+        // lib.mapAttrs' (n: v: lib.nameValuePair "config-test-${n}" v) tests.results.configs
         // devPackages;
       }
     ));

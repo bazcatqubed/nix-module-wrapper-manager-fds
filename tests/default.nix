@@ -10,34 +10,38 @@ in
 }:
 
 let
-  wrapperManagerLibTests = import ./lib { inherit pkgs; };
   inherit (pkgs) lib;
+  wrapperManagerLibTests = import ./lib { inherit pkgs; };
+  configs = import ./configs { inherit pkgs; };
 
-  configs' = import ./configs { inherit pkgs; };
-  configs =
-    let
-      updateTestName =
-        configName: package:
-        lib.mapAttrs' (n: v: lib.nameValuePair "${configName}-${n}" v) package.wrapperManagerTests;
-    in
-    lib.concatMapAttrs updateTestName configs';
 in
 {
-  inherit configs configs';
+  data = {
+    inherit configs;
+    lib = wrapperManagerLibTests;
+  };
 
-  lib =
-    pkgs.runCommand "wrapper-manager-fds-lib-test"
-      {
-        testData = builtins.toJSON wrapperManagerLibTests;
-        passAsFile = [ "testData" ];
-        nativeBuildInputs = with pkgs; [
-          yajsv
-          jq
-        ];
-      }
-      ''
-        yajsv -s "${./lib/tests.schema.json}" "$testDataPath" && touch $out || jq . "$testDataPath"
-      '';
+  results = {
+    configs =
+      let
+        updateTestName =
+          configName: package:
+          lib.mapAttrs' (n: v: lib.nameValuePair "${configName}-${n}" v) package.wrapperManagerTests;
+      in
+      lib.concatMapAttrs updateTestName configs;
 
-  _lib = wrapperManagerLibTests;
+    lib =
+      pkgs.runCommand "wrapper-manager-fds-lib-test"
+        {
+          testData = builtins.toJSON wrapperManagerLibTests;
+          passAsFile = [ "testData" ];
+          nativeBuildInputs = with pkgs; [
+            yajsv
+            jq
+          ];
+        }
+        ''
+          yajsv -s "${./lib/tests.schema.json}" "$testDataPath" && touch $out || jq . "$testDataPath"
+        '';
+  };
 }
