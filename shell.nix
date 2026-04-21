@@ -34,6 +34,7 @@ pkgs.mkShell {
     ))
     vale-ls
     asciidoctor-with-extensions
+    reuse
 
     npins
     treefmt
