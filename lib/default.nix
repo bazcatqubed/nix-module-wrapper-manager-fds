@@ -22,8 +22,12 @@ pkgs.lib.makeExtensible (
         inherit (pkgs) lib;
         inherit pkgs self;
       };
+
+    releaseInfo = pkgs.lib.importJSON ../release.json;
   in
   {
+    inherit (releaseInfo) version;
+
     env = import ./env.nix;
     utils = callLibs ./utils.nix;
     modules = callLibs ./modules.nix;

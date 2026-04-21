@@ -67,4 +67,9 @@ lib.runTests {
     expr = self.utils.splitStringOnce ":" "there/is/no/colon/here";
     expected = [ "there/is/no/colon/here" ];
   };
+
+  testsCheckForVersion = {
+    expr = lib.versionAtLeast self.version "26.05";
+    expected = true;
+  };
 }
