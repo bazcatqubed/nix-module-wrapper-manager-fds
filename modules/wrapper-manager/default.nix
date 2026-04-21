@@ -11,7 +11,7 @@
     ./xdg-dirs.nix
     ./locale.nix
     ./build.nix
-    ./extra-args.nix
+    ./lib.nix
 
     ./programs/systemd
     ./programs/gnome-session

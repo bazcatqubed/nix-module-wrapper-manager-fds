@@ -42,6 +42,7 @@ in
   data-format-files = buildConfig ./data-format-files;
   gnome-session-basic-example = buildConfig ./gnome-session-basic-example.nix;
   gnome-session-basic-example-empty = buildConfig ./gnome-session-basic-example-empty.nix;
+  lib-extra = buildConfig ./lib-extra.nix;
 
   # Testing out from the library set that needs the module environment.
   lib-modules-make-wraparound = buildConfig ./lib-modules-subset/make-wraparound.nix;

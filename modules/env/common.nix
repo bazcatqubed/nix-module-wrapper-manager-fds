@@ -42,13 +42,6 @@ let
   };
 in
 {
-  imports = [
-    # Bringing all of the arguments from the wrapper-manager environment for
-    # convenience. It would also allow its users for full control without using
-    # the integration module itself.
-    ../wrapper-manager/extra-args.nix
-  ];
-
   options.wrapper-manager = {
     enableInstall = lib.mkOption {
       type = lib.types.bool;
@@ -171,4 +164,9 @@ in
       };
     };
   };
+
+  # Bringing all the arguments from the wrapper-manager environment for
+  # convenience. It would also allow its users for full control without using
+  # the integration module itself.
+  config._module.args.wrapperManagerLib = import ../../lib { inherit pkgs; };
 }
