@@ -24,7 +24,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     importNpmLock.hooks.linkNodeModulesHook
     nodejs
-    nodePackages.prettier
+    prettier
     vscode-langservers-extracted
     (vale.withStyles (p: with p; [
       proselint
