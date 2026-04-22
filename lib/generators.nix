@@ -8,6 +8,16 @@
   self,
 }:
 
+let
+  inherit (lib)
+    concatMapStringsSep
+    concatStringsSep
+    escape
+    generators
+    isList
+    mapAttrsToList
+    ;
+in
 {
   /**
     Render a given value to systemd INI data format.
@@ -58,22 +68,22 @@
   toSystemdINI =
     attrsOfSections:
     let
-      mkSectionName = (name: lib.escape [ "[" "]" ] name);
+      mkSectionName = (name: escape [ "[" "]" ] name);
 
-      toKeyValue = lib.generators.toKeyValue {
-        mkKeyValue = lib.generators.mkKeyValueDefault { } "=";
+      toKeyValue = generators.toKeyValue {
+        mkKeyValue = generators.mkKeyValueDefault { } "=";
         listsAsDuplicateKeys = true;
       };
 
       # map function to string for each key val
       mapAttrsToStringsSep =
         sep: mapFn: attrs:
-        lib.concatStringsSep sep (lib.mapAttrsToList mapFn attrs);
+        concatStringsSep sep (mapAttrsToList mapFn attrs);
 
       mkSection =
         sectName: sectValues:
-        if lib.isList sectValues then
-          lib.concatMapStringsSep "\n" (
+        if isList sectValues then
+          concatMapStringsSep "\n" (
             v:
             ''
               [${mkSectionName sectName}]

@@ -8,6 +8,11 @@
   self,
 }:
 
+let
+  inherit (lib)
+    types
+    ;
+in
 rec {
   /**
     Nix-representable data format for systemd INI format as described from
@@ -35,7 +40,7 @@ rec {
     { }:
     {
       type =
-        with lib.types;
+        with types;
         let
           atomUnit = oneOf [
             bool

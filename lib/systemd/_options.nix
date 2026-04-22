@@ -20,16 +20,28 @@ let
 
   inherit (lib)
     any
+    attrNames
     concatMap
+    concatMapStrings
     filterOverrides
     isList
     literalExpression
+    makeBinPath
+    makeSearchPathOutput
+    mapAttrs'
     mergeEqualOption
+    mkAfter
+    mkEnableOption
     mkIf
     mkMerge
     mkOption
     mkOptionType
+    nameValuePair
+    optionalAttrs
+    optionalString
     singleton
+    stringLength
+    strings
     toList
     types
     ;
@@ -74,7 +86,7 @@ rec {
   # This is a baseline option set for the unit which is shared by ALL systemd
   # unit modules.
   sharedOptions = {
-    enable = lib.mkEnableOption null // {
+    enable = mkEnableOption null // {
       default = true;
       description = ''
         Whether to enable generation of the systemd unit in the final
@@ -82,19 +94,19 @@ rec {
       '';
     };
 
-    name = lib.mkOption {
-      type = lib.types.str;
+    name = mkOption {
+      type = types.str;
       description = ''
         The name of this systemd unit, including its extension.
         This can be used to refer to this unit from other systemd units.
       '';
     };
 
-    enableStatelessInstallation = lib.mkEnableOption "stateless setup of the systemd units in the derivation";
+    enableStatelessInstallation = mkEnableOption "stateless setup of the systemd units in the derivation";
 
     # The filename can be different especially if it's a drop-in unit.
-    filename = lib.mkOption {
-      type = lib.types.str;
+    filename = mkOption {
+      type = types.str;
       description = ''
         The filename of the systemd unit. This should be preferred to refer to
         the file path in the resulting output path where it can generate
@@ -361,45 +373,45 @@ rec {
 
       config = {
         unitConfig =
-          lib.optionalAttrs (config.requires != [ ]) { Requires = config.requires; }
-          // lib.optionalAttrs (config.wants != [ ]) { Wants = config.wants; }
-          // lib.optionalAttrs (config.upholds != [ ]) { Upholds = config.upholds; }
-          // lib.optionalAttrs (config.after != [ ]) { After = config.after; }
-          // lib.optionalAttrs (config.before != [ ]) { Before = config.before; }
-          // lib.optionalAttrs (config.bindsTo != [ ]) { BindsTo = config.bindsTo; }
-          // lib.optionalAttrs (config.partOf != [ ]) { PartOf = config.partOf; }
-          // lib.optionalAttrs (config.conflicts != [ ]) { Conflicts = config.conflicts; }
-          // lib.optionalAttrs (config.requisite != [ ]) { Requisite = config.requisite; }
-          // lib.optionalAttrs (config.description != "") {
+          optionalAttrs (config.requires != [ ]) { Requires = config.requires; }
+          // optionalAttrs (config.wants != [ ]) { Wants = config.wants; }
+          // optionalAttrs (config.upholds != [ ]) { Upholds = config.upholds; }
+          // optionalAttrs (config.after != [ ]) { After = config.after; }
+          // optionalAttrs (config.before != [ ]) { Before = config.before; }
+          // optionalAttrs (config.bindsTo != [ ]) { BindsTo = config.bindsTo; }
+          // optionalAttrs (config.partOf != [ ]) { PartOf = config.partOf; }
+          // optionalAttrs (config.conflicts != [ ]) { Conflicts = config.conflicts; }
+          // optionalAttrs (config.requisite != [ ]) { Requisite = config.requisite; }
+          // optionalAttrs (config.description != "") {
             Description = config.description;
           }
-          // lib.optionalAttrs (config.documentation != [ ]) {
+          // optionalAttrs (config.documentation != [ ]) {
             Documentation = config.documentation;
           }
-          // lib.optionalAttrs (config.onFailure != [ ]) {
+          // optionalAttrs (config.onFailure != [ ]) {
             OnFailure = config.onFailure;
           }
-          // lib.optionalAttrs (config.onSuccess != [ ]) {
+          // optionalAttrs (config.onSuccess != [ ]) {
             OnSuccess = config.onSuccess;
           }
-          // lib.optionalAttrs (options.startLimitIntervalSec.isDefined) {
+          // optionalAttrs (options.startLimitIntervalSec.isDefined) {
             StartLimitIntervalSec = toString config.startLimitIntervalSec;
           }
-          // lib.optionalAttrs (options.startLimitBurst.isDefined) {
+          // optionalAttrs (options.startLimitBurst.isDefined) {
             StartLimitBurst = toString config.startLimitBurst;
           };
 
         installConfig =
-          lib.optionalAttrs (config.wantedBy != [ ]) {
+          optionalAttrs (config.wantedBy != [ ]) {
             WantedBy = config.wantedBy;
           }
-          // lib.optionalAttrs (config.aliases != [ ]) {
+          // optionalAttrs (config.aliases != [ ]) {
             Alias = config.aliases;
           }
-          // lib.optionalAttrs (config.requiredBy != [ ]) {
+          // optionalAttrs (config.requiredBy != [ ]) {
             RequiredBy = config.requiredBy;
           }
-          // lib.optionalAttrs (config.upheldBy != [ ]) {
+          // optionalAttrs (config.upheldBy != [ ]) {
             UpheldBy = config.upheldBy;
           };
 
@@ -407,10 +419,10 @@ rec {
           let
             inherit (config) unitConfig installConfig;
           in
-          lib.mkMerge [
-            (lib.mkIf (unitConfig != { }) { Unit = unitConfig; })
-            (lib.mkIf (installConfig != { }) { Install = installConfig; })
-            (lib.mapAttrs' (n: v: lib.nameValuePair "X-${n}" v) config.extraSectionsConfig)
+          mkMerge [
+            (mkIf (unitConfig != { }) { Unit = unitConfig; })
+            (mkIf (installConfig != { }) { Install = installConfig; })
+            (mapAttrs' (n: v: nameValuePair "X-${n}" v) config.extraSectionsConfig)
           ];
       };
     };
@@ -504,26 +516,26 @@ rec {
 
       config = mkMerge [
         {
-          settings.Service = lib.mkIf (config.serviceConfig != { }) config.serviceConfig;
+          settings.Service = mkIf (config.serviceConfig != { }) config.serviceConfig;
         }
 
-        (lib.mkIf (config.environment != { }) {
+        (mkIf (config.environment != { }) {
           serviceConfig.Environment =
             let
               env = config.environment;
             in
-            lib.map (
+            map (
               n:
               let
-                s = lib.optionalString (env.${n} != null) "${lib.strings.toJSON "${n}=${env.${n}}"}";
+                s = optionalString (env.${n} != null) "${strings.toJSON "${n}=${env.${n}}"}";
                 # systemd max line length is now 1MiB
                 # https://github.com/systemd/systemd/commit/e6dde451a51dc5aaa7f4d98d39b8fe735f73d2af
               in
-              if lib.stringLength s >= 1048576 then
+              if stringLength s >= 1048576 then
                 throw "The value of the environment variable ‘${n}’ in systemd service ‘${config.name}.service’ is too long."
               else
                 s
-            ) (lib.attrNames env);
+            ) (attrNames env);
         })
 
         (mkIf (config.preStart != "") rec {
@@ -634,7 +646,7 @@ rec {
           '';
         };
 
-        enableCommonDependencies = lib.mkEnableOption null // {
+        enableCommonDependencies = mkEnableOption null // {
           description = ''
             Whether to install additional dependencies on the generated scripts of
             systemd services.
@@ -690,12 +702,12 @@ rec {
         };
       };
 
-      config = lib.mkMerge [
-        (lib.mkIf config.enableCommonDependencies {
+      config = mkMerge [
+        (mkIf config.enableCommonDependencies {
           # The common dependencies is just based from NixOS' version of
           # stage 2 systemd services except without systemd since this is
           # more focused on generating generic systemd units.
-          path = lib.mkAfter [
+          path = mkAfter [
             pkgs.coreutils
             pkgs.findutils
             pkgs.gnugrep
@@ -703,9 +715,9 @@ rec {
           ];
         })
 
-        (lib.mkIf (config.path != [ ]) {
-          environment.PATH = "${lib.makeBinPath config.path}:${
-            lib.makeSearchPathOutput "bin" "sbin" config.path
+        (mkIf (config.path != [ ]) {
+          environment.PATH = "${makeBinPath config.path}:${
+            makeSearchPathOutput "bin" "sbin" config.path
           }";
         })
       ];
@@ -757,10 +769,10 @@ rec {
         };
       };
 
-      config = lib.mkMerge [
+      config = mkMerge [
         { settings.Socket = config.socketConfig; }
 
-        (lib.mkIf (config.preStart != "") rec {
+        (mkIf (config.preStart != "") rec {
           jobScripts = makeJobScript {
             name = "${name}-pre-start";
             text = config.preStart;
@@ -768,7 +780,7 @@ rec {
           };
           socketConfig.ExecStartPre = [ jobScripts ];
         })
-        (lib.mkIf (config.postStart != "") rec {
+        (mkIf (config.postStart != "") rec {
           jobScripts = makeJobScript {
             name = "${name}-post-start";
             text = config.postStart;
@@ -776,7 +788,7 @@ rec {
           };
           socketConfig.ExecStartPost = [ jobScripts ];
         })
-        (lib.mkIf (config.preStop != "") rec {
+        (mkIf (config.preStop != "") rec {
           jobScripts = makeJobScript {
             name = "${name}-pre-stop";
             text = config.preStop;
@@ -784,7 +796,7 @@ rec {
           };
           socketConfig.ExecStopPre = jobScripts;
         })
-        (lib.mkIf (config.postStop != "") rec {
+        (mkIf (config.postStop != "") rec {
           jobScripts = makeJobScript {
             name = "${name}-post-stop";
             text = config.postStop;
@@ -793,30 +805,30 @@ rec {
           socketConfig.ExecStopPost = jobScripts;
         })
 
-        (lib.mkIf (config.environment != { }) {
+        (mkIf (config.environment != { }) {
           socketConfig.Environment =
             let
               env = config.environment;
             in
-            lib.concatMapStrings (
+            concatMapStrings (
               n:
               let
-                s = lib.optionalString (env.${n} != null) "${lib.strings.toJSON "${n}=${env.${n}}"}\n";
+                s = optionalString (env.${n} != null) "${strings.toJSON "${n}=${env.${n}}"}\n";
                 # systemd max line length is now 1MiB
                 # https://github.com/systemd/systemd/commit/e6dde451a51dc5aaa7f4d98d39b8fe735f73d2af
               in
-              if lib.stringLength s >= 1048576 then
+              if stringLength s >= 1048576 then
                 throw "The value of the environment variable ‘${n}’ in systemd service ‘${config.name}.service’ is too long."
               else
                 s
-            ) (lib.attrNames env);
+            ) (attrNames env);
         })
 
-        (lib.mkIf (config.listenStreams != [ ]) {
+        (mkIf (config.listenStreams != [ ]) {
           socketConfig.ListenStream = config.listenStreams;
         })
 
-        (lib.mkIf (config.listenDatagrams != [ ]) {
+        (mkIf (config.listenDatagrams != [ ]) {
           socketConfig.ListenDatagram = config.listenDatagrams;
         })
       ];

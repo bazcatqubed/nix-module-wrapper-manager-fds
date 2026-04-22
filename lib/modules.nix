@@ -16,10 +16,10 @@
 
 let
   inherit (lib)
-    optionals
     attrNames
     mkMerge
     mkOrder
+    optionals
     ;
 in
 rec {
