@@ -11,9 +11,9 @@ in
 
 let
   wmLib = (import ../../. { }).lib;
-  build =
+  eval =
     args:
-    wmLib.build (
+    wmLib.eval (
       args
       // {
         inherit pkgs;
@@ -23,7 +23,7 @@ let
       }
     );
 
-  buildConfig = file: build { modules = [ file ]; };
+  buildConfig = file: eval { modules = [ file ]; };
 in
 {
   fastfetch = buildConfig ./wrapper-fastfetch.nix;
@@ -36,7 +36,7 @@ in
   systemd-unit-data-format-files = buildConfig ./systemd-unit-data-format-files.nix;
   systemd-unit-with-empty-value = buildConfig ./systemd-unit-with-empty-value.nix;
   systemd-automount-and-mount-units = buildConfig ./systemd-automount-and-mount-units.nix;
-  systemd-modular-service-integration = build {
+  systemd-modular-service-integration = eval {
     modules = [
       ./systemd-modular-service-integration.nix
       ../../modules/wrapper-manager/programs/systemd/modular-services.nix

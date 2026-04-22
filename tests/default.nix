@@ -26,7 +26,9 @@ in
       let
         updateTestName =
           configName: package:
-          lib.mapAttrs' (n: v: lib.nameValuePair "${configName}-${n}" v) package.wrapperManagerTests;
+          lib.mapAttrs' (
+            n: v: lib.nameValuePair "${configName}-${n}" v
+          ) package.config.build.toplevel.wrapperManagerTests;
       in
       lib.concatMapAttrs updateTestName configs;
 
