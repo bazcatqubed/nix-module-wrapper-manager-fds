@@ -24,6 +24,7 @@ pkgs.mkShell {
   packages = with pkgs; [
     importNpmLock.hooks.linkNodeModulesHook
     nodejs
+    nil
     prettier
     vscode-langservers-extracted
     (vale.withStyles (
