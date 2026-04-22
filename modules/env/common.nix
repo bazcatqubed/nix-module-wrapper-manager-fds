@@ -3,9 +3,11 @@
 # SPDX-License-Identifier: MIT
 
 {
+  options,
   config,
   lib,
   pkgs,
+  wrapperManagerLib,
   ...
 }:
 
@@ -18,6 +20,9 @@ let
     specialArgs = cfg.extraSpecialArgs;
     modules = [
       ../wrapper-manager
+
+      "${pkgs.path}/nixos/modules/misc/assertions.nix"
+      "${pkgs.path}/nixos/modules/misc/meta.nix"
 
       (
         { name, lib, ... }:
@@ -166,8 +171,30 @@ in
     };
   };
 
-  # Bringing all the arguments from the wrapper-manager environment for
-  # convenience. It would also allow its users for full control without using
-  # the integration module itself.
-  config._module.args.wrapperManagerLib = import ../../lib { inherit pkgs; };
+  config = {
+    # Bringing the library set from the wrapper-manager environment for
+    # convenience. It would also allow its users for full control without using
+    # the integration module itself.
+    _module.args.wrapperManagerLib = import ../../lib { inherit pkgs; };
+
+    # Since the wrapper packages are included as a native submodule instead of
+    # evaluating it ourselves which imports the assertion module, the wrapper
+    # configs' assertions and warnings should be properly imported into the
+    # wider-scoped environment for a nicer traceback.
+    warnings =
+      let
+        getWrapperWarnings =
+          name: wrapperCfg:
+          wrapperManagerLib.utils.getWarnings (options.wrapper-manager.packages.loc ++ [ name ]) wrapperCfg;
+      in
+      lib.concatLists (lib.mapAttrsToList getWrapperWarnings cfg.packages);
+
+    assertions =
+      let
+        getWrapperAssertions =
+          name: wrapperCfg:
+          wrapperManagerLib.utils.getAssertions (options.wrapper-manager.packages.loc ++ [ name ]) wrapperCfg;
+      in
+      lib.concatLists (lib.mapAttrsToList getWrapperAssertions cfg.packages);
+  };
 }

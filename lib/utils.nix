@@ -156,4 +156,58 @@ rec {
       s'
     else
       [ (lib.head s') ] ++ [ (lib.concatStringsSep sep (lib.drop 1 s')) ];
+
+  /**
+    Get all the assertions from the wrapper configuration to be compiled
+    into a new list of assertions.
+
+    This is mainly used for integrating wrapper-manager-fds into wider-scoped
+    module environments as a submodule (e.g., home-manager users into NixOS)
+    rather than evaluating it as a new package.
+
+    # Arguments
+
+    loc
+    : Name of the prefix to be display when Nix traces the evaluation.
+
+    config
+    : Wrapper (i.e., wrapper-manager-fds) configuration.
+
+    # Type
+
+    ```
+    getAssertions :: [str] -> attr -> [Assertions]
+    ```
+
+    # Examples
+
+    ```nix
+    getAssertions (options.wrapper-manager.packages.loc ++ [ $NAME ]) config.wrapper-manager.packages.$NAME
+    => [
+      {
+        message = "in wrapper-manager.packages.$NAME: 1 + 1 is not 4";
+        assertion = 1 + 1 == 4;
+      }
+    ]
+    ```
+  */
+  getAssertions =
+    loc: wrapperConfig:
+    lib.map (
+      n:
+      builtins.trace wrapperConfig {
+        message = "in ${lib.showOption loc}: ${n.message}";
+        assertion = n.assertion;
+      }
+    ) wrapperConfig.assertions;
+
+  /**
+    Similar to `getAssertions` but for the module warnings.
+
+    # Arguments
+
+    See `getAssertions` as it requires the same arguments.
+  */
+  getWarnings =
+    loc: wrapperConfig: lib.map (msg: "in ${lib.showOption loc}: ${msg}") wrapperConfig.warnings;
 }
