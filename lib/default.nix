@@ -13,17 +13,24 @@
 # module.
 { pkgs }:
 
-pkgs.lib.makeExtensible (
+let
+  inherit (pkgs) lib;
+
+  inherit (lib)
+    makeExtensible
+    importJSON
+    ;
+in
+makeExtensible (
   self:
   let
     callLibs =
       file:
       import file {
-        inherit (pkgs) lib;
-        inherit pkgs self;
+        inherit pkgs lib self;
       };
 
-    releaseInfo = pkgs.lib.importJSON ../release.json;
+    releaseInfo = importJSON ../release.json;
   in
   {
     inherit (releaseInfo) version;
