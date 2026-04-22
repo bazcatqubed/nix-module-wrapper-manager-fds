@@ -8,6 +8,17 @@
   self,
 }:
 
+let
+  inherit (lib)
+    concatStringsSep
+    drop
+    head
+    length
+    map
+    showOption
+    splitString
+    ;
+in
 rec {
   /**
     Given a list of derivations, return a list of the store path with the `bin`
@@ -35,7 +46,7 @@ rec {
     ]
     ```
   */
-  getBin = drvs: builtins.map (v: lib.getBin v) drvs;
+  getBin = drvs: builtins.map (v: getBin v) drvs;
 
   /**
     Given a list of derivations, return a list of the store paths with the
@@ -91,7 +102,7 @@ rec {
     ]
     ```
   */
-  getXdgConfigDirs = drvs: builtins.map (v: "${v}/etc/xdg") drvs;
+  getXdgConfigDirs = drvs: map (v: "${v}/etc/xdg") drvs;
 
   /**
     Given a list of derivations, return a list of store paths appended with
@@ -126,7 +137,7 @@ rec {
 
     # Arguments
 
-    Same as `lib.splitString` from nixpkgs.
+    Same as `splitString` from nixpkgs.
 
     # Type
 
@@ -150,12 +161,12 @@ rec {
   splitStringOnce =
     sep: s:
     let
-      s' = lib.splitString sep s;
+      s' = splitString sep s;
     in
-    if lib.length s' == 1 then
+    if length s' == 1 then
       s'
     else
-      [ (lib.head s') ] ++ [ (lib.concatStringsSep sep (lib.drop 1 s')) ];
+      [ (head s') ] ++ [ (concatStringsSep sep (drop 1 s')) ];
 
   /**
     Get all the assertions from the wrapper configuration to be compiled
@@ -193,10 +204,10 @@ rec {
   */
   getAssertions =
     loc: wrapperConfig:
-    lib.map (
+    map (
       n:
       builtins.trace wrapperConfig {
-        message = "in ${lib.showOption loc}: ${n.message}";
+        message = "in ${showOption loc}: ${n.message}";
         assertion = n.assertion;
       }
     ) wrapperConfig.assertions;
@@ -209,5 +220,5 @@ rec {
     See `getAssertions` as it requires the same arguments.
   */
   getWarnings =
-    loc: wrapperConfig: lib.map (msg: "in ${lib.showOption loc}: ${msg}") wrapperConfig.warnings;
+    loc: wrapperConfig: map (msg: "in ${showOption loc}: ${msg}") wrapperConfig.warnings;
 }

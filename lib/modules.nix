@@ -14,6 +14,14 @@
   self,
 }:
 
+let
+  inherit (lib)
+    optionals
+    attrNames
+    mkMerge
+    mkOrder
+    ;
+in
 rec {
   /**
     Make a wrapper-manager wrapper config containing a sub-wrapper that wraps
@@ -77,9 +85,9 @@ rec {
       # These are the attrnames that would be overtaken with the function and
       # will be merged anyways so...
       functionArgs = builtins.functionArgs makeWraparound;
-      module' = lib.removeAttrs module (lib.attrNames functionArgs);
+      module' = removeAttrs module (attrNames functionArgs);
     in
-    lib.mkMerge [
+    mkMerge [
       {
         arg0 = under;
 
@@ -88,7 +96,7 @@ rec {
         # arbitrarily just in case the user already has `prependArgs` values
         # with `lib.mkBefore` for the original arg0.
         prependArgs = mkWraparoundBefore (
-          underFlags ++ lib.optionals (underSeparator != "") [ underSeparator ] ++ [ arg0 ]
+          underFlags ++ optionals (underSeparator != "") [ underSeparator ] ++ [ arg0 ]
         );
       }
 
@@ -111,5 +119,5 @@ rec {
     mkWraparoundBefore wraparoundArgs ++ [ "--" ] ++ [ (lib.getExe pkgs.hello) ]
     ```
   */
-  mkWraparoundBefore = lib.mkOrder 250;
+  mkWraparoundBefore = mkOrder 250;
 }
