@@ -27,6 +27,47 @@
   self,
 }:
 
+let
+  inherit (lib)
+    all
+    concatLists
+    concatMap
+    concatMapStringsSep
+    concatStrings
+    concatStringsSep
+    const
+    elem
+    filterAttrs
+    getExe
+    hasPrefix
+    head
+    isDerivation
+    isFloat
+    isInt
+    isList
+    isPath
+    isString
+    last
+    length
+    mapAttrs
+    mapAttrsToList
+    match
+    optional
+    optionalString
+    range
+    removePrefix
+    removeSuffix
+    replaceStrings
+    reverseList
+    splitString
+    stringToCharacters
+    strings
+    tail
+    toIntBase10
+    trace
+    types
+  ;
+in
 rec {
   /**
     Convert the given non-generic unit options into the generic units version.
@@ -102,7 +143,7 @@ rec {
     pkgs.buildEnv {
       ignoreCollisions = false;
       name = "wrapper-manager-systemd-generated-units";
-      paths = lib.mapAttrsToList (_: v: v.unit) (lib.filterAttrs (_: v: v.enable) units);
+      paths = mapAttrsToList (_: v: v.unit) (filterAttrs (_: v: v.enable) units);
     };
 
   options = import ./_options.nix { inherit pkgs lib self; };
@@ -129,7 +170,7 @@ rec {
     => "\\\\$"
     ```
   */
-  shellEscape = s: (lib.replaceStrings [ "\\" ] [ "\\\\" ] s);
+  shellEscape = s: (replaceStrings [ "\\" ] [ "\\\\" ] s);
 
   /**
     Given a Nix string, return a path-safe name typically used as part of a
@@ -153,12 +194,12 @@ rec {
     => "foo-sample.service"
     ```
   */
-  mkPathSafeName = lib.replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
+  mkPathSafeName = replaceStrings [ "@" ":" "\\" "[" "]" ] [ "-" "-" "-" "" "" ];
 
   /**
     Module type for matching with the systemd unit filenames.
   */
-  unitNameType = lib.types.strMatching "[a-zA-Z0-9@%:_.\\-]+[.](service|socket|device|mount|automount|swap|target|path|timer|scope|slice)";
+  unitNameType = types.strMatching "[a-zA-Z0-9@%:_.\\-]+[.](service|socket|device|mount|automount|swap|target|path|timer|scope|slice)";
 
   /**
     Given a string, split the unit name into the unit name and its drop-in, if
@@ -208,7 +249,7 @@ rec {
     => hello.service.d
     ```
   */
-  getUnitName = s: lib.head (splitUnitFilename s);
+  getUnitName = s: head (splitUnitFilename s);
 
   /**
     Given a name and an extension, create the unit filename. Typically used for
@@ -243,8 +284,8 @@ rec {
     suffix: s:
     let
       unitName' = splitUnitFilename s;
-      unitName = lib.head unitName';
-      overrideName = lib.last unitName';
+      unitName = head unitName';
+      overrideName = last unitName';
     in
     if unitName == overrideName then
       "${unitName}.${suffix}"
@@ -270,7 +311,7 @@ rec {
           mkdir -p "$out/$(dirname -- "$name")"
           mv "$textPath" "$out/$name"
         ''
-        + lib.optionalString unit.enableStatelessInstallation (
+        + optionalString unit.enableStatelessInstallation (
           let
             makeSymlinkScript =
               suffix: _item:
@@ -283,15 +324,15 @@ rec {
               '';
           in
           ''
-            ${lib.concatStrings (
+            ${concatStrings (
               builtins.map (alias: ''
                 ln -sfn $name "$out/${shellEscape alias}"
               '') unit.aliases
             )}
 
-            ${lib.concatStrings (builtins.map (makeSymlinkScript "wants") unit.wantedBy)}
-            ${lib.concatStrings (builtins.map (makeSymlinkScript "requires") unit.requiredBy)}
-            ${lib.concatStrings (builtins.map (makeSymlinkScript "upholds") unit.upheldBy)}
+            ${concatStrings (builtins.map (makeSymlinkScript "wants") unit.wantedBy)}
+            ${concatStrings (builtins.map (makeSymlinkScript "requires") unit.requiredBy)}
+            ${concatStrings (builtins.map (makeSymlinkScript "upholds") unit.upheldBy)}
           ''
         )
       );
@@ -303,18 +344,18 @@ rec {
     "no"
   ];
 
-  digits = map toString (lib.range 0 9);
+  digits = map toString (range 0 9);
 
   isByteFormat =
     s:
     let
-      l = lib.reverseList (lib.stringToCharacters s);
-      suffix = lib.head l;
-      nums = lib.tail l;
+      l = reverseList (stringToCharacters s);
+      suffix = head l;
+      nums = tail l;
     in
     builtins.isInt s
     || (
-      lib.elem suffix (
+      elem suffix (
         [
           "K"
           "M"
@@ -323,56 +364,56 @@ rec {
         ]
         ++ digits
       )
-      && lib.all (num: lib.elem num digits) nums
+      && all (num: elem num digits) nums
     );
 
   assertByteFormat =
     name: group: attr:
-    lib.optional (
+    optional (
       attr ? ${name} && !isByteFormat attr.${name}
     ) "Systemd ${group} field `${name}' must be in byte format [0-9]+[KMGT].";
 
   toIntBaseDetected =
     value:
-    assert (lib.match "[0-9]+|0x[0-9a-fA-F]+" value) != null;
+    assert (match "[0-9]+|0x[0-9a-fA-F]+" value) != null;
     (builtins.fromTOML "v=${value}").v;
 
-  hexChars = lib.stringToCharacters "0123456789abcdefABCDEF";
+  hexChars = stringToCharacters "0123456789abcdefABCDEF";
 
   isNumberOrRangeOf =
     check: v:
-    if lib.isInt v then
+    if isInt v then
       check v
     else
       let
-        parts = lib.splitString "-" v;
-        lower = lib.toIntBase10 (lib.head parts);
-        upper = if lib.tail parts != [ ] then lib.toIntBase10 (lib.head (lib.tail parts)) else lower;
+        parts = splitString "-" v;
+        lower = toIntBase10 (head parts);
+        upper = if tail parts != [ ] then toIntBase10 (head (tail parts)) else lower;
       in
-      lib.length parts <= 2 && lower <= upper && check lower && check upper;
+      length parts <= 2 && lower <= upper && check lower && check upper;
   isPort = i: i >= 0 && i <= 65535;
   isPortOrPortRange = isNumberOrRangeOf isPort;
 
   assertValueOneOf =
     name: values: group: attr:
-    lib.optional (
-      attr ? ${name} && !lib.elem attr.${name} values
+    optional (
+      attr ? ${name} && !elem attr.${name} values
     ) "Systemd ${group} field `${name}' cannot have value `${toString attr.${name}}'.";
 
   assertValuesSomeOfOr =
     name: values: default: group: attr:
-    lib.optional (
+    optional (
       attr ? ${name}
-      && !(lib.all (x: lib.elem x values) (lib.splitString " " attr.${name}) || attr.${name} == default)
+      && !(all (x: elem x values) (splitString " " attr.${name}) || attr.${name} == default)
     ) "Systemd ${group} field `${name}' cannot have value `${toString attr.${name}}'.";
 
   assertHasField =
     name: group: attr:
-    lib.optional (!(attr ? ${name})) "Systemd ${group} field `${name}' must exist.";
+    optional (!(attr ? ${name})) "Systemd ${group} field `${name}' must exist.";
 
   assertMinimum =
     name: min: group: attr:
-    lib.optional (
+    optional (
       attr ? ${name} && attr.${name} < min
     ) "Systemd ${group} field `${name}' must be greater than or equal to ${toString min}";
 
@@ -382,7 +423,7 @@ rec {
       # We're applied at the top-level type (attrsOf unitOption), so the actual
       # unit options might contain attributes from mkOverride and mkIf that we need to
       # convert into single values before checking them.
-      defs = lib.mapAttrs (lib.const (
+      defs = mapAttrs (const (
         v:
         if v._type or "" == "override" then
           v.content
@@ -391,9 +432,9 @@ rec {
         else
           v
       )) attrs;
-      errors = lib.concatMap (c: c group defs) checks;
+      errors = concatMap (c: c group defs) checks;
     in
-    if errors == [ ] then true else lib.trace (lib.concatStringsSep "\n" errors) false;
+    if errors == [ ] then true else trace (concatStringsSep "\n" errors) false;
 
   toOption =
     x:
@@ -406,13 +447,13 @@ rec {
 
   attrsToSection =
     as:
-    lib.concatStrings (
-      lib.concatLists (
-        lib.mapAttrsToList (
+    concatStrings (
+      concatLists (
+        mapAttrsToList (
           name: value:
           map (x: ''
             ${name}=${toOption x}
-          '') (if lib.isList value then value else [ value ])
+          '') (if isList value then value else [ value ])
         ) as
       )
     );
@@ -424,7 +465,7 @@ rec {
       enableStrictShellChecks,
     }:
     let
-      scriptName = lib.replaceStrings [ "\\" "@" ] [ "-" "_" ] (shellEscape name);
+      scriptName = replaceStrings [ "\\" "@" ] [ "-" "_" ] (shellEscape name);
       out =
         (
           if !enableStrictShellChecks then
@@ -445,7 +486,7 @@ rec {
             name = "unit-script-${scriptName}";
           });
     in
-    lib.getExe out;
+    getExe out;
 
   # Create a directory that contains systemd definition files from an attrset
   # that contains the file names as keys and the content as values. The values
@@ -453,11 +494,11 @@ rec {
   definitions =
     directoryName: format: definitionAttrs:
     let
-      listOfDefinitions = lib.mapAttrsToList (name: format.generate "${name}.conf") definitionAttrs;
+      listOfDefinitions = mapAttrsToList (name: format.generate "${name}.conf") definitionAttrs;
     in
     pkgs.runCommand directoryName { } ''
       mkdir -p $out
-      ${(lib.concatStringsSep "\n" (map (pkg: "cp ${pkg} $out/${pkg.name}") listOfDefinitions))}
+      ${(concatStringsSep "\n" (map (pkg: "cp ${pkg} $out/${pkg.name}") listOfDefinitions))}
     '';
 
   # Escape a path according to the systemd rules. FIXME: slow
@@ -469,13 +510,13 @@ rec {
     let
       replacePrefix =
         p: r: s:
-        (if (lib.hasPrefix p s) then r + (lib.removePrefix p s) else s);
-      trim = s: lib.removeSuffix "/" (lib.removePrefix "/" s);
-      normalizedPath = lib.strings.normalizePath s;
+        (if (hasPrefix p s) then r + (removePrefix p s) else s);
+      trim = s: removeSuffix "/" (removePrefix "/" s);
+      normalizedPath = strings.normalizePath s;
     in
-    lib.replaceStrings [ "/" ] [ "-" ] (
-      replacePrefix "." (lib.strings.escapeC [ "." ] ".") (
-        lib.strings.escapeC (lib.stringToCharacters " !\"#$%&'()*+,;<=>=@[\\]^`{|}~-") (
+    replaceStrings [ "/" ] [ "-" ] (
+      replacePrefix "." (strings.escapeC [ "." ] ".") (
+        strings.escapeC (stringToCharacters " !\"#$%&'()*+,;<=>=@[\\]^`{|}~-") (
           if normalizedPath == "/" then normalizedPath else trim normalizedPath
         )
       )
@@ -492,18 +533,18 @@ rec {
     arg:
     let
       s =
-        if lib.isPath arg then
+        if isPath arg then
           "${arg}"
-        else if lib.isString arg then
+        else if isString arg then
           arg
-        else if lib.isInt arg || lib.isFloat arg || lib.isDerivation arg then
+        else if isInt arg || isFloat arg || isDerivation arg then
           toString arg
         else
           throw "escapeSystemdExecArg only allows strings, paths, numbers and derivations";
     in
-    lib.replaceStrings [ "%" "$" ] [ "%%" "$$" ] (lib.strings.toJSON s);
+    replaceStrings [ "%" "$" ] [ "%%" "$$" ] (strings.toJSON s);
 
   # Quotes a list of arguments into a single string for use in a Exec*
   # line.
-  escapeSystemdExecArgs = lib.concatMapStringsSep " " escapeSystemdExecArg;
+  escapeSystemdExecArgs = concatMapStringsSep " " escapeSystemdExecArg;
 }
