@@ -23,9 +23,17 @@
     wrapper-manager = ./modules/env/home-manager;
   };
 
-  wrapperModules = {
+  wrapperModules = rec {
     modular-services = ./modules/wrapper-manager/modular-services.nix;
     systemd-modular-services-integration = ./modules/wrapper-manager/programs/systemd/modular-services.nix;
+
+    # All-in-one module package for modular service integration.
+    modular-services-full = {
+      imports = [
+        modular-services
+        systemd-modular-services-integration
+      ];
+    };
   };
 
   # The main library interface that can be used for immediate consumption.
