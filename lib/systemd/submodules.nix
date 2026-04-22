@@ -34,6 +34,10 @@
 }:
 
 let
+  inherit (lib)
+    singleton
+    ;
+
   inherit (self.systemd)
     escapeSystemdPath
     makeUnit
@@ -73,7 +77,7 @@ rec {
   /**
     List of modules associated for {option}`programs.systemd.$VARIANT.units`.
   */
-  units = lib.singleton (
+  units = singleton (
     {
       name,
       config,
