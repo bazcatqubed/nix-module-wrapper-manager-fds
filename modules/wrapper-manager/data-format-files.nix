@@ -11,28 +11,38 @@
 }:
 
 let
+  inherit (lib)
+    literalExpression
+    mapAttrs'
+    mkEnableOption
+    mkIf
+    mkMerge
+    mkOption
+    nameValuePair
+    types
+  ;
+
   cfg = config.dataFormats;
 
   dataFileModule =
     {
       config,
       name,
-      lib,
       ...
     }:
     {
       options = {
-        target = lib.mkOption {
-          type = lib.types.str;
+        target = mkOption {
+          type = types.str;
           description = ''
             Path relative to the derivation output path.
           '';
-          example = lib.literalExpression "/etc/xdg/app/config.json";
+          example = literalExpression "/etc/xdg/app/config.json";
           default = name;
         };
 
-        variant = lib.mkOption {
-          type = lib.types.nonEmptyStr;
+        variant = mkOption {
+          type = types.nonEmptyStr;
           description = ''
             Indicates what data format to generate for the data file from
             {option}`dataFormats.formats`.
@@ -41,8 +51,8 @@ let
           example = "yaml";
         };
 
-        mode = lib.mkOption {
-          type = lib.types.strMatching "[0-7]{3,4}";
+        mode = mkOption {
+          type = types.strMatching "[0-7]{3,4}";
           default = "0444";
           example = "0600";
           description = ''
@@ -51,14 +61,14 @@ let
           '';
         };
 
-        content = lib.mkOption {
+        content = mkOption {
           type = cfg.formats.${config.variant}.type // {
             description = "given from {option}`dataFormats.formats.<variant>.type`";
           };
           description = ''
             The data content structure in accordance to the variant's type.
           '';
-          example = lib.literalExpression ''
+          example = literalExpression ''
             {
               num_of_boundaries = 67;
               battle.skills = [
@@ -77,18 +87,18 @@ let
   formatModule =
     { name, ... }:
     {
-      freeformType = with lib.types; attrsOf anything;
+      freeformType = with types; attrsOf anything;
 
       options = {
-        type = lib.mkOption {
-          type = lib.types.optionType;
+        type = mkOption {
+          type = types.optionType;
           description = ''
             The module option type for the value of the Nix-representable format.
           '';
         };
 
-        generate = lib.mkOption {
-          type = with lib.types; functionTo (functionTo package);
+        generate = mkOption {
+          type = with types; functionTo (functionTo package);
           description = ''
             The generator function for the Nix-representable format.
           '';
@@ -98,8 +108,8 @@ let
 in
 {
   options.dataFormats = {
-    formats = lib.mkOption {
-      type = with lib.types; attrsOf (submodule formatModule);
+    formats = mkOption {
+      type = with types; attrsOf (submodule formatModule);
       description = ''
         A set of [Nix-representable
         formats](https://nixos.org/manual/nixos/unstable/#sec-settings-nix-representable)
@@ -107,7 +117,7 @@ in
         {option}`dataFormats.files.<name>.content`.
       '';
       default = { };
-      example = lib.literalExpression ''
+      example = literalExpression ''
         {
           json = pkgs.formats.json { };
           ini = pkgs.formats.ini { };
@@ -115,7 +125,7 @@ in
       '';
     };
 
-    enableCommonFormats = lib.mkEnableOption null // {
+    enableCommonFormats = mkEnableOption null // {
       description = ''
         Whether to initialize {option}`dataFormats.formats` with common formats.
 
@@ -135,7 +145,7 @@ in
       example = false;
     };
 
-    enableExtraFormats = lib.mkEnableOption null // {
+    enableExtraFormats = mkEnableOption null // {
       description = ''
         Whether to initialize extra data formats from other modules.
 
@@ -146,17 +156,17 @@ in
       '';
     };
 
-    files = lib.mkOption {
-      type = with lib.types; attrsOf (submodule dataFileModule);
+    files = mkOption {
+      type = with types; attrsOf (submodule dataFileModule);
       default = { };
       description = ''
         A set of data files to be exported to the package.
       '';
-      example = lib.literalExpression ''
+      example = literalExpression ''
         {
           "share/lazygit/config.yml" = {
             variant = "yaml";
-            content = lib.mkMerge [
+            content = mkMerge [
               {
                 gui = {
                   expandFocusedSidePanel = true;
@@ -171,7 +181,7 @@ in
               }
 
               {
-                gui.expandFocusedSidePanel = lib.mkForce false;
+                gui.expandFocusedSidePanel = mkForce false;
               }
             ];
           };
@@ -189,8 +199,8 @@ in
     };
   };
 
-  config = lib.mkMerge [
-    (lib.mkIf cfg.enableCommonFormats {
+  config = mkMerge [
+    (mkIf cfg.enableCommonFormats {
       dataFormats.formats = {
         json = pkgs.formats.json { };
         toml = pkgs.formats.toml { };
@@ -199,19 +209,19 @@ in
       };
     })
 
-    (lib.mkIf (cfg.files != { }) {
+    (mkIf (cfg.files != { }) {
       files =
         let
           generateFile =
             n: v:
-            lib.nameValuePair n {
+            nameValuePair n {
               inherit (v) mode;
               source =
                 cfg.formats.${v.variant}.generate "wrapper-manager-data-file-${builtins.baseNameOf n}"
                   v.content;
             };
         in
-        lib.mapAttrs' generateFile cfg.files;
+        mapAttrs' generateFile cfg.files;
     })
   ];
 }

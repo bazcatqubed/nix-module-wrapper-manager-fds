@@ -10,11 +10,24 @@
 }:
 
 let
+  inherit (lib)
+    concatStringsSep
+    elem
+    escapeShellArg
+    lists
+    literalExpression
+    mapAttrsToList
+    mkIf
+    mkMerge
+    mkOption
+    optionals
+    types
+  ;
   envConfig = config;
 
   toStringType =
     (
-      with lib.types;
+      with types;
       coercedTo (oneOf [
         str
         path
@@ -35,8 +48,8 @@ let
     }:
     {
       options = {
-        action = lib.mkOption {
-          type = lib.types.enum [
+        action = mkOption {
+          type = types.enum [
             "unset"
             "set"
             "set-default"
@@ -62,8 +75,8 @@ let
           example = "unset";
         };
 
-        value = lib.mkOption {
-          type = with lib.types; either toStringType (listOf toStringType);
+        value = mkOption {
+          type = with types; either toStringType (listOf toStringType);
           description = ''
             The value of the variable that is holding.
 
@@ -74,8 +87,8 @@ let
           example = "HELLO THERE";
         };
 
-        separator = lib.mkOption {
-          type = lib.types.str;
+        separator = mkOption {
+          type = types.str;
           description = ''
             Separator used to create a character-delimited list of the
             environment variable holding a list of values.
@@ -99,32 +112,32 @@ let
       ...
     }:
     let
-      flagType = with lib.types; listOf toStringType;
+      flagType = with types; listOf toStringType;
     in
     {
       options = {
-        prependArgs = lib.mkOption {
+        prependArgs = mkOption {
           type = flagType;
           description = ''
             A list of arguments to be prepended to the user-given argument for the
             wrapper script.
           '';
           default = [ ];
-          example = lib.literalExpression ''
+          example = literalExpression ''
             [
               "--config" ./config.conf
             ]
           '';
         };
 
-        appendArgs = lib.mkOption {
+        appendArgs = mkOption {
           type = flagType;
           description = ''
             A list of arguments to be appended to the user-given argument for the
             wrapper script.
           '';
           default = [ ];
-          example = lib.literalExpression ''
+          example = literalExpression ''
             [
               "--name" "doggo"
               "--location" "Your mom's home"
@@ -132,16 +145,16 @@ let
           '';
         };
 
-        arg0 = lib.mkOption {
-          type = lib.types.str;
+        arg0 = mkOption {
+          type = types.str;
           description = ''
             The first argument of the wrapper script.
           '';
-          example = lib.literalExpression "lib.getExe' pkgs.fastfetch \"fastfetch\"";
+          example = literalExpression "getExe' pkgs.fastfetch \"fastfetch\"";
         };
 
-        executableName = lib.mkOption {
-          type = lib.types.nonEmptyStr;
+        executableName = mkOption {
+          type = types.nonEmptyStr;
           description = "The name of the executable.";
           default = name;
           example = "custom-name";
@@ -150,8 +163,8 @@ let
         env = options.environment.variables;
         pathAdd = options.environment.pathAdd;
 
-        preScript = lib.mkOption {
-          type = lib.types.lines;
+        preScript = mkOption {
+          type = types.lines;
           description = ''
             Script fragments to run before the main executable.
 
@@ -161,7 +174,7 @@ let
             :::
           '';
           default = "";
-          example = lib.literalExpression ''
+          example = literalExpression ''
             echo "HELLO WORLD!"
           '';
         };
@@ -169,8 +182,8 @@ let
         # makeWrapperArgs are unescaped, a third-party module author can take
         # advantage of that with runtime expansion values (if using the shell
         # wrapper).
-        makeWrapperArgs = lib.mkOption {
-          type = with lib.types; listOf str;
+        makeWrapperArgs = mkOption {
+          type = with types; listOf str;
           description = ''
             A list of extra arguments to be passed as part of `makeWrapper`
             build step.
@@ -179,29 +192,29 @@ let
         };
       };
 
-      config = lib.mkMerge [
+      config = mkMerge [
         {
           env = envConfig.environment.variables;
           pathAdd = envConfig.environment.pathAdd;
 
           makeWrapperArgs =
-            lib.mapAttrsToList (
+            mapAttrsToList (
               n: v:
               if v.action == "unset" then
-                "--${v.action} ${lib.escapeShellArg n}"
+                "--${v.action} ${escapeShellArg n}"
               else if
-                lib.elem v.action [
+                elem v.action [
                   "prefix"
                   "suffix"
                 ]
               then
-                "--${v.action} ${lib.escapeShellArg n} ${lib.escapeShellArg v.separator} ${lib.escapeShellArg (lib.concatStringsSep v.separator v.value)}"
+                "--${v.action} ${escapeShellArg n} ${escapeShellArg v.separator} ${escapeShellArg (concatStringsSep v.separator v.value)}"
               else
-                "--${v.action} ${lib.escapeShellArg n} ${lib.escapeShellArg v.value}"
+                "--${v.action} ${escapeShellArg n} ${escapeShellArg v.value}"
             ) config.env
-            ++ (builtins.map (v: "--add-flags ${lib.escapeShellArg v}") config.prependArgs)
-            ++ (builtins.map (v: "--append-flags ${lib.escapeShellArg v}") config.appendArgs)
-            ++ (lib.optionals (envConfig.build.variant == "shell" && config.preScript != "") (
+            ++ (builtins.map (v: "--add-flags ${escapeShellArg v}") config.prependArgs)
+            ++ (builtins.map (v: "--append-flags ${escapeShellArg v}") config.appendArgs)
+            ++ (optionals (envConfig.build.variant == "shell" && config.preScript != "") (
               let
                 preScript =
                   pkgs.runCommand "wrapper-script-prescript-${config.executableName}" { }
@@ -214,8 +227,8 @@ let
             ));
         }
 
-        (lib.mkIf (config.pathAdd != [ ]) {
-          env.PATH.value = lib.lists.map builtins.toString config.pathAdd;
+        (mkIf (config.pathAdd != [ ]) {
+          env.PATH.value = lists.map builtins.toString config.pathAdd;
           env.PATH.action = "prefix";
         })
       ];
@@ -223,17 +236,17 @@ let
 in
 {
   options = {
-    wrappers = lib.mkOption {
-      type = with lib.types; attrsOf (submodule wrapperType);
+    wrappers = mkOption {
+      type = with types; attrsOf (submodule wrapperType);
       description = ''
         A set of wrappers to be included in the resulting derivation from
         wrapper-manager evaluation.
       '';
       default = { };
-      example = lib.literalExpression ''
+      example = literalExpression ''
         {
           yt-dlp-audio = {
-            arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
+            arg0 = getExe' pkgs.yt-dlp "yt-dlp";
             prependArgs = [
               "--config-location" ./config/yt-dlp/audio.conf
             ];
@@ -242,8 +255,8 @@ in
       '';
     };
 
-    basePackages = lib.mkOption {
-      type = with lib.types; either package (listOf package);
+    basePackages = mkOption {
+      type = with types; either package (listOf package);
       description = ''
         Packages to be included in the wrapper package. However, there are
         differences in behavior when given certain values.
@@ -258,21 +271,21 @@ in
         `symlinkJoin` as the builder to create the derivation.
       '';
       default = [ ];
-      example = lib.literalExpression ''
+      example = literalExpression ''
         with pkgs; [
           yt-dlp
         ]
       '';
     };
 
-    environment.variables = lib.mkOption {
-      type = with lib.types; attrsOf (submodule envSubmodule);
+    environment.variables = mkOption {
+      type = with types; attrsOf (submodule envSubmodule);
       description = ''
         A global set of environment variables and their actions to be applied
         per-wrapper.
       '';
       default = { };
-      example = lib.literalExpression ''
+      example = literalExpression ''
         {
           "FOO_TYPE".value = "custom";
           "FOO_LOG_STYLE" = {
@@ -284,14 +297,14 @@ in
       '';
     };
 
-    environment.pathAdd = lib.mkOption {
-      type = with lib.types; listOf path;
+    environment.pathAdd = mkOption {
+      type = with types; listOf path;
       description = ''
         A global list of paths to be added per-wrapper as part of the `PATH`
         environment variable.
       '';
       default = [ ];
-      example = lib.literalExpression ''
+      example = literalExpression ''
         wrapperManagerLib.getBin (with pkgs; [
           yt-dlp
           gallery-dl

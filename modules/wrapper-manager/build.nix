@@ -9,15 +9,28 @@
   ...
 }:
 
+let
+  inherit (lib)
+    attrValues
+    concatMapStrings
+    concatStringsSep
+    isList
+    literalExpression
+    mkOption
+    optionals
+    recursiveUpdate
+    types
+  ;
+in
 {
   options.build = {
-    drvName = lib.mkOption {
-      type = lib.types.nonEmptyStr;
+    drvName = mkOption {
+      type = types.nonEmptyStr;
       description = ''
         The name of the final derivation output.
       '';
       default =
-        if lib.isList config.basePackages then
+        if isList config.basePackages then
           "wrapper-manager-fds-wrapped-package"
         else
           let
@@ -33,8 +46,8 @@
       example = "my-custom-package-name";
     };
 
-    variant = lib.mkOption {
-      type = lib.types.enum [
+    variant = mkOption {
+      type = types.enum [
         "binary"
         "shell"
       ];
@@ -46,16 +59,16 @@
       example = "shell";
     };
 
-    extraSetup = lib.mkOption {
-      type = lib.types.lines;
+    extraSetup = mkOption {
+      type = types.lines;
       description = ''
         Additional script for setting up the wrapper script derivation.
       '';
       default = "";
     };
 
-    extraPassthru = lib.mkOption {
-      type = with lib.types; attrsOf anything;
+    extraPassthru = mkOption {
+      type = with types; attrsOf anything;
       description = ''
         Set of data to be passed through `passthru` of the resulting
         derivation.
@@ -63,22 +76,22 @@
       default = { };
     };
 
-    extraMeta = lib.mkOption {
-      type = with lib.types; attrsOf anything;
+    extraMeta = mkOption {
+      type = with types; attrsOf anything;
       description = ''
         Additional attributes to be passed as part of `meta` in the resulting
         derivation.
       '';
       default = { };
-      example = lib.literalExpression ''
+      example = literalExpression ''
         {
           mainProgram = config.wrappers.hello.executableName;
         }
       '';
     };
 
-    toplevel = lib.mkOption {
-      type = lib.types.package;
+    toplevel = mkOption {
+      type = types.package;
       readOnly = true;
       internal = true;
       description = "A derivation containing the wrapper script.";
@@ -100,15 +113,15 @@
 
           mkWrapBuild =
             wrappers:
-            lib.concatMapStrings (v: ''
-              ${makeWrapperArg0} "${v.arg0}" "${builtins.placeholder "out"}/bin/${v.executableName}" ${lib.concatStringsSep " " v.makeWrapperArgs}
+            concatMapStrings (v: ''
+              ${makeWrapperArg0} "${v.arg0}" "${builtins.placeholder "out"}/bin/${v.executableName}" ${concatStringsSep " " v.makeWrapperArgs}
             '') wrappers;
 
           mkDesktopEntries = desktopEntries: builtins.map (entry: pkgs.makeDesktopItem entry) desktopEntries;
 
-          desktopEntries = mkDesktopEntries (lib.attrValues config.xdg.desktopEntries);
+          desktopEntries = mkDesktopEntries (attrValues config.xdg.desktopEntries);
         in
-        if lib.isList config.basePackages then
+        if isList config.basePackages then
           pkgs.buildEnv {
             passthru = config.build.extraPassthru;
             meta = config.build.extraMeta;
@@ -123,7 +136,7 @@
                 [ ];
             postBuild = ''
               ${config.build.extraSetup}
-              ${mkWrapBuild (lib.attrValues config.wrappers)}
+              ${mkWrapBuild (attrValues config.wrappers)}
             '';
           }
         else
@@ -140,19 +153,19 @@
                   else
                     [ ]
                 )
-                ++ lib.optionals (config.xdg.desktopEntries != { }) [ pkgs.copyDesktopItems ];
+                ++ optionals (config.xdg.desktopEntries != { }) [ pkgs.copyDesktopItems ];
               desktopItems = (prev.desktopItems or [ ]) ++ desktopEntries;
               postFixup = ''
                 ${prev.postFixup or ""}
-                ${mkWrapBuild (lib.attrValues config.wrappers)}
+                ${mkWrapBuild (attrValues config.wrappers)}
               '';
-              passthru = lib.recursiveUpdate (prev.passthru or { }) (
+              passthru = recursiveUpdate (prev.passthru or { }) (
                 config.build.extraPassthru
                 // {
                   unwrapped = config.basePackages;
                 }
               );
-              meta = lib.recursiveUpdate (prev.meta or { }) config.build.extraMeta;
+              meta = recursiveUpdate (prev.meta or { }) config.build.extraMeta;
             }
           );
     };
