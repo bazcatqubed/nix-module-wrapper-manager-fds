@@ -10,6 +10,14 @@
 }:
 
 let
+  inherit (lib)
+    filterAttrs
+    mapAttrsToList
+    mkEnableOption
+    mkIf
+    optionals
+    ;
+
   cfg = config.wrapper-manager;
   wmDocs = import ../../../docs {
     inherit pkgs;
@@ -21,7 +29,7 @@ in
 
   options.wrapper-manager = {
     enableInstallSystemdUnits =
-      lib.mkEnableOption "install systemd units from wrapper-manager packages"
+      mkEnableOption "install systemd units from wrapper-manager packages"
       // {
         default = true;
       };
@@ -30,11 +38,11 @@ in
   config = lib.mkMerge [
     {
       environment.systemPackages =
-        lib.optionals cfg.documentation.manpage.enable [
+        optionals cfg.documentation.manpage.enable [
           wmDocs.outputs.manpage
           wmDocs.outputs.manpageCommonEnv.nixos
         ]
-        ++ lib.optionals cfg.documentation.html.enable [ wmDocs.outputs.html ];
+        ++ optionals cfg.documentation.html.enable [ wmDocs.outputs.html ];
 
       wrapper-manager.extraSpecialArgs.nixosConfig = config;
 
@@ -61,14 +69,14 @@ in
       ];
     }
 
-    (lib.mkIf (cfg.packages != { }) (
+    (mkIf (cfg.packages != { }) (
       let
         filterPackages =
           cond:
           let
-            validPackages = lib.filterAttrs cond cfg.packages;
+            validPackages = filterAttrs cond cfg.packages;
           in
-          lib.mapAttrsToList (_: wrapper: wrapper.build.toplevel) validPackages;
+          mapAttrsToList (_: wrapper: wrapper.build.toplevel) validPackages;
       in
       {
         environment.systemPackages = filterPackages (_: wrapper: wrapper.enableInstall);

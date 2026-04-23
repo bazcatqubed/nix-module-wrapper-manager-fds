@@ -12,9 +12,23 @@
 }:
 
 let
+  inherit (lib)
+    concatLists
+    literalExpression
+    mapAttrsToList
+    mkEnableOption
+    mkOption
+    types
+  ;
+
+  inherit (wrapperManagerLib.utils)
+    getAssertions
+    getWarnings
+  ;
+
   cfg = config.wrapper-manager;
 
-  wrapperManagerModule = lib.types.submoduleWith {
+  wrapperManagerModule = types.submoduleWith {
     description = "wrapper-manager configuration";
     class = "wrapperManager";
     specialArgs = cfg.extraSpecialArgs;
@@ -49,8 +63,8 @@ let
 in
 {
   options.wrapper-manager = {
-    enableInstall = lib.mkOption {
-      type = lib.types.bool;
+    enableInstall = mkOption {
+      type = types.bool;
       description = ''
         Enable installing the package to the wider-scoped environment list
         of packages. This is to be set as the default value of
@@ -60,10 +74,10 @@ in
       example = false;
     };
 
-    sharedModules = lib.mkOption {
-      type = with lib.types; listOf deferredModule;
+    sharedModules = mkOption {
+      type = with types; listOf deferredModule;
       default = [ ];
-      example = lib.literalExpression ''
+      example = literalExpression ''
         [
           {
             config.build = {
@@ -77,18 +91,18 @@ in
       '';
     };
 
-    packages = lib.mkOption {
-      type = lib.types.attrsOf wrapperManagerModule;
+    packages = mkOption {
+      type = types.attrsOf wrapperManagerModule;
       description = ''
         A set of wrappers to be added into the environment configuration.
       '';
       default = { };
       visible = "shallow";
-      example = lib.literalExpression ''
+      example = literalExpression ''
         {
           custom-ricing = { lib, pkgs, ... }: {
             wrappers.fastfetch = {
-              arg0 = lib.getExe' pkgs.fastfetch "fastfetch";
+              arg0 = getExe' pkgs.fastfetch "fastfetch";
               appendArgs = [
                 "--config" ./config/fastfetch/config
                 "--logo" "Guix"
@@ -99,21 +113,21 @@ in
 
           music-setup = { lib, pkgs, ... }: {
             wrappers.yt-dlp-audio = {
-              arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
+              arg0 = getExe' pkgs.yt-dlp "yt-dlp";
               prependArgs = [
                 "--config-location" ./config/yt-dlp/audio.conf
               ];
             };
 
             wrappers.yt-dlp-video = {
-              arg0 = lib.getExe' pkgs.yt-dlp "yt-dlp";
+              arg0 = getExe' pkgs.yt-dlp "yt-dlp";
               prependArgs = [
                 "--config-location" ./config/yt-dlp/video.conf
               ];
             };
 
             wrappers.beets-fds = {
-              arg0 = lib.getExe' pkgs.beet "beet";
+              arg0 = getExe' pkgs.beet "beet";
               prependArgs = [
                 "--config" ./config/beets/config
               ];
@@ -122,7 +136,7 @@ in
 
           writing = { lib, pkgs, ... }: {
             wrappers.asciidoctor-fds = {
-              arg = lib.getExe' pkgs.asciidoctor-with-extensions "asciidoctor";
+              arg = getExe' pkgs.asciidoctor-with-extensions "asciidoctor";
               executableName = "asciidoctor";
               prependArgs =
                 builtins.map (v: "-r ''${v}") [
@@ -135,8 +149,8 @@ in
       '';
     };
 
-    extraSpecialArgs = lib.mkOption {
-      type = with lib.types; attrsOf anything;
+    extraSpecialArgs = mkOption {
+      type = with types; attrsOf anything;
       default = { };
       description = ''
         Additional set of module arguments to be passed to `specialArgs` of
@@ -152,17 +166,17 @@ in
     # environments and we're trying not to make a spotlight for wrapper-manager
     # in whatever form including exporting the documentation.
     documentation = {
-      manpage.enable = lib.mkEnableOption "manpage output";
-      html.enable = lib.mkEnableOption "HTML output";
+      manpage.enable = mkEnableOption "manpage output";
+      html.enable = mkEnableOption "HTML output";
 
-      extraModules = lib.mkOption {
-        type = with lib.types; listOf deferredModule;
+      extraModules = mkOption {
+        type = with types; listOf deferredModule;
         description = ''
           List of extra wrapper-manager modules to be included as part of the
           documentation.
         '';
         default = [ ];
-        example = lib.literalExpression ''
+        example = literalExpression ''
           [
             ./modules/wrapper-manager
           ]
@@ -185,16 +199,16 @@ in
       let
         getWrapperWarnings =
           name: wrapperCfg:
-          wrapperManagerLib.utils.getWarnings (options.wrapper-manager.packages.loc ++ [ name ]) wrapperCfg;
+          getWarnings (options.wrapper-manager.packages.loc ++ [ name ]) wrapperCfg;
       in
-      lib.concatLists (lib.mapAttrsToList getWrapperWarnings cfg.packages);
+      concatLists (mapAttrsToList getWrapperWarnings cfg.packages);
 
     assertions =
       let
         getWrapperAssertions =
           name: wrapperCfg:
-          wrapperManagerLib.utils.getAssertions (options.wrapper-manager.packages.loc ++ [ name ]) wrapperCfg;
+          getAssertions (options.wrapper-manager.packages.loc ++ [ name ]) wrapperCfg;
       in
-      lib.concatLists (lib.mapAttrsToList getWrapperAssertions cfg.packages);
+      concatLists (mapAttrsToList getWrapperAssertions cfg.packages);
   };
 }

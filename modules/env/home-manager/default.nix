@@ -10,6 +10,15 @@
 }@moduleArgs:
 
 let
+  inherit (lib)
+    filterAttrs
+    mapAttrsToList
+    mkDefault
+    mkIf
+    mkMerge
+    optionals
+  ;
+
   cfg = config.wrapper-manager;
   wmDocs = import ../../../docs {
     inherit pkgs;
@@ -19,37 +28,37 @@ in
 {
   imports = [ ../common.nix ];
 
-  config = lib.mkMerge [
+  config = mkMerge [
     {
       home.packages =
-        lib.optionals cfg.documentation.manpage.enable [
+        optionals cfg.documentation.manpage.enable [
           wmDocs.outputs.manpage
           wmDocs.outputs.manpageCommonEnv.home-manager
         ]
-        ++ lib.optionals cfg.documentation.html.enable [ wmDocs.outputs.html ];
+        ++ optionals cfg.documentation.html.enable [ wmDocs.outputs.html ];
 
       wrapper-manager.extraSpecialArgs.hmConfig = config;
     }
 
-    (lib.mkIf (moduleArgs ? nixosConfig) {
+    (mkIf (moduleArgs ? nixosConfig) {
       wrapper-manager.sharedModules = [
         (
           { lib, ... }:
           {
             # NixOS already has the option to set the locale so we don't need to
             # have this.
-            config.locale.enable = lib.mkDefault false;
+            config.locale.enable = mkDefault false;
           }
         )
       ];
     })
 
-    (lib.mkIf (cfg.packages != { }) {
+    (mkIf (cfg.packages != { }) {
       home.packages =
         let
-          validPackages = lib.filterAttrs (_: wrapper: wrapper.enableInstall) cfg.packages;
+          validPackages = filterAttrs (_: wrapper: wrapper.enableInstall) cfg.packages;
         in
-        lib.mapAttrsToList (_: wrapper: wrapper.build.toplevel) validPackages;
+        mapAttrsToList (_: wrapper: wrapper.build.toplevel) validPackages;
     })
   ];
 }
