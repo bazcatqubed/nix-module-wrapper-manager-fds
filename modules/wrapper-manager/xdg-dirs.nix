@@ -5,17 +5,25 @@
 { config, lib, ... }:
 
 let
+  inherit (lib)
+    lists
+    literalExpression
+    mkMerge
+    mkOption
+    types
+  ;
+
   cfg = config.xdg;
 
   xdgDirsOption = {
-    configDirs = lib.mkOption {
-      type = with lib.types; listOf str;
+    configDirs = mkOption {
+      type = with types; listOf str;
       description = ''
         A list of paths to be appended as part of the `XDG_CONFIG_DIRS`
         environment to be applied per-wrapper.
       '';
       default = [ ];
-      example = lib.literalExpression ''
+      example = literalExpression ''
         wrapperManagerLib.getXdgConfigDirs (with pkgs; [
           yt-dlp
           fastfetch
@@ -23,14 +31,14 @@ let
       '';
     };
 
-    dataDirs = lib.mkOption {
-      type = with lib.types; listOf str;
+    dataDirs = mkOption {
+      type = with types; listOf str;
       description = ''
         A list of paths to be appended as part of the `XDG_DATA_DIRS`
         environment to be applied per-wrapper.
       '';
       default = [ ];
-      example = lib.literalExpression ''
+      example = literalExpression ''
         wrapperManagerLib.getXdgDataDirs (with pkgs; [
           yt-dlp
           fastfetch
@@ -42,7 +50,7 @@ in
 {
   options.xdg = xdgDirsOption;
 
-  options.wrappers = lib.mkOption {
+  options.wrappers = mkOption {
     type =
       let
         xdgDirsType =
@@ -55,7 +63,7 @@ in
           {
             options.xdg = xdgDirsOption;
 
-            config = lib.mkMerge [
+            config = mkMerge [
               {
                 # When set this way, we could allow the user to override everything.
                 xdg.configDirs = cfg.configDirs;
@@ -63,18 +71,18 @@ in
               }
 
               (lib.mkIf (config.xdg.configDirs != [ ]) {
-                env.XDG_CONFIG_DIRS.value = lib.lists.map builtins.toString config.xdg.configDirs;
+                env.XDG_CONFIG_DIRS.value = lists.map builtins.toString config.xdg.configDirs;
                 env.XDG_CONFIG_DIRS.action = "prefix";
               })
 
               (lib.mkIf (config.xdg.dataDirs != [ ]) {
-                env.XDG_DATA_DIRS.value = lib.lists.map builtins.toString config.xdg.dataDirs;
+                env.XDG_DATA_DIRS.value = lists.map builtins.toString config.xdg.dataDirs;
                 env.XDG_DATA_DIRS.action = "prefix";
               })
             ];
           };
       in
-      with lib.types;
+      with types;
       attrsOf (submodule xdgDirsType);
   };
 }
