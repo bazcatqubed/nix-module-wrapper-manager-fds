@@ -10,6 +10,20 @@
 }:
 
 let
+  inherit (lib)
+    escapeShellArg
+    filesystem
+    foldlAttrs
+    literalExpression
+    mkBefore
+    mkIf
+    mkOption
+    modules
+    replaceStrings
+    strings
+    types
+  ;
+
   cfg = config.files;
 
   filesModule =
@@ -22,8 +36,8 @@ let
     }:
     {
       options = {
-        target = lib.mkOption {
-          type = lib.types.nonEmptyStr;
+        target = mkOption {
+          type = types.nonEmptyStr;
           description = ''
             Path of the file relative to the derivation output path.
           '';
@@ -31,13 +45,13 @@ let
           example = "share/applications/org.example.App1.desktop";
         };
 
-        source = lib.mkOption {
-          type = lib.types.path;
+        source = mkOption {
+          type = types.path;
           description = "Path of the file to be linked.";
         };
 
-        text = lib.mkOption {
-          type = with lib.types; nullOr lines;
+        text = mkOption {
+          type = with types; nullOr lines;
           description = ''
             Text content of the given filesystem path.
           '';
@@ -48,8 +62,8 @@ let
           '';
         };
 
-        mode = lib.mkOption {
-          type = lib.types.strMatching "[0-7]{0,4}";
+        mode = mkOption {
+          type = types.strMatching "[0-7]{0,4}";
           default = "0644";
           example = "0600";
           description = ''
@@ -60,18 +74,18 @@ let
       };
 
       config = {
-        source = lib.mkIf (config.text != null) (
+        source = mkIf (config.text != null) (
           let
-            name' = "wrapper-manager-filesystem-${lib.replaceStrings [ "/" ] [ "-" ] name}";
+            name' = "wrapper-manager-filesystem-${replaceStrings [ "/" ] [ "-" ] name}";
           in
-          lib.modules.mkDerivedConfig options.text (pkgs.writeText name')
+          modules.mkDerivedConfig options.text (pkgs.writeText name')
         );
       };
     };
 in
 {
-  options.files = lib.mkOption {
-    type = with lib.types; attrsOf (submodule filesModule);
+  options.files = mkOption {
+    type = with types; attrsOf (submodule filesModule);
     description = ''
       Extra set of files to be exported within the derivation.
 
@@ -83,7 +97,7 @@ in
       :::
     '';
     default = { };
-    example = lib.literalExpression ''
+    example = literalExpression ''
       {
         "share/example-app/docs".source = ./docs;
         "etc/xdg".source = ./config;
@@ -96,18 +110,18 @@ in
     '';
   };
 
-  config = lib.mkIf (cfg != { }) {
+  config = mkIf (cfg != { }) {
     build.extraSetup =
       let
         installFiles =
           acc: n: v:
           let
-            source = lib.escapeShellArg v.source;
-            target = lib.escapeShellArg v.target;
-            target' = lib.strings.normalizePath "$out/${target}";
+            source = escapeShellArg v.source;
+            target = escapeShellArg v.target;
+            target' = strings.normalizePath "$out/${target}";
             installFile =
               let
-                type = lib.filesystem.pathType v.source;
+                type = filesystem.pathType v.source;
               in
               if type == "directory" then
                 ''
@@ -127,8 +141,8 @@ in
             ${installFile}
           '';
       in
-      lib.mkBefore ''
-        ${lib.foldlAttrs installFiles "" cfg}
+      mkBefore ''
+        ${foldlAttrs installFiles "" cfg}
       '';
   };
 }

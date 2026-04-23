@@ -9,9 +9,16 @@
   ...
 }:
 
+let
+  inherit (lib)
+    literalExpression
+    mkOption
+    types
+  ;
+in
 {
-  options.wrapperManagerLibExtra = lib.mkOption {
-    type = with lib.types; attrsOf anything;
+  options.wrapperManagerLibExtra = mkOption {
+    type = with types; attrsOf anything;
     description = ''
       Set of items to be included within `wrapperManagerLib.extra` namespace.
 
@@ -23,7 +30,7 @@
       :::
     '';
     default = { };
-    example = lib.literalExpression ''
+    example = literalExpression ''
       {
         numBits = 943;
 

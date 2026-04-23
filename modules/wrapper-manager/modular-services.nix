@@ -11,6 +11,17 @@
 }:
 
 let
+  inherit (lib)
+    concatLists
+    head
+    literalExpression
+    mapAttrs
+    mapAttrsToList
+    mkOption
+    tail
+    types
+  ;
+
   cfg = config.environment.services;
 
   portable-lib = import "${pkgs.path}/lib/services/lib.nix" { inherit lib; };
@@ -21,25 +32,25 @@ let
   };
 in
 {
-  options.environment.services = lib.mkOption {
+  options.environment.services = mkOption {
     description = ''
       Set of [modular
       services](https://nixos.org/manual/nixos/stable/#modular-services) to be
       integrated within the module environment.
     '';
-    type = lib.types.attrsOf moduleServiceConfiguration.serviceSubmodule;
+    type = types.attrsOf moduleServiceConfiguration.serviceSubmodule;
     default = { };
     visible = "shallow";
   };
 
-  options.environment.sharedServiceModules = lib.mkOption {
+  options.environment.sharedServiceModules = mkOption {
     description = ''
       Additional modules to be imported through all of the modular service
       configurations.
     '';
-    type = with lib.types; listOf deferredModule;
+    type = with types; listOf deferredModule;
     default = [ ];
-    example = lib.literalExpression ''
+    example = literalExpression ''
       [
         "''${pkgs.path}/nixos/modules/system/service/systemd/system.nix"
         "''${pkgs.path}/nixos/modules/system/service/systemd/config-data.nix"
@@ -54,15 +65,15 @@ in
         fn (options.environment.services.loc ++ [ name ]) cfg;
     in
     {
-      assertions = lib.concatLists (
-        lib.mapAttrsToList (mkSubmoduleWarnings portable-lib.getAssertions) cfg
+      assertions = concatLists (
+        mapAttrsToList (mkSubmoduleWarnings portable-lib.getAssertions) cfg
       );
 
-      warnings = lib.concatLists (lib.mapAttrsToList (mkSubmoduleWarnings portable-lib.getWarnings) cfg);
+      warnings = concatLists (lib.mapAttrsToList (mkSubmoduleWarnings portable-lib.getWarnings) cfg);
 
-      wrappers = lib.mapAttrs (name: value: {
-        arg0 = lib.head value.process.argv;
-        appendArgs = lib.tail value.process.argv;
+      wrappers = mapAttrs (name: value: {
+        arg0 = head value.process.argv;
+        appendArgs = tail value.process.argv;
       }) cfg;
     };
 }

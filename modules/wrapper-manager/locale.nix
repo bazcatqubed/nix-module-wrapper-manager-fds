@@ -10,6 +10,12 @@
 }:
 
 let
+  inherit (lib)
+    mkIf
+    mkOption
+    types
+  ;
+
   cfg = config.locale;
 
   localeModuleFactory =
@@ -17,8 +23,8 @@ let
       isGlobal ? false,
     }:
     {
-      enable = lib.mkOption {
-        type = lib.types.bool;
+      enable = mkOption {
+        type = types.bool;
         default = if isGlobal then true else cfg.enable;
         example = false;
         description =
@@ -34,8 +40,8 @@ let
             '';
       };
 
-      package = lib.mkOption {
-        type = lib.types.package;
+      package = mkOption {
+        type = types.package;
         default = if isGlobal then (pkgs.glibcLocales.override { allLocales = true; }) else cfg.package;
         description = ''
           The package containing glibc locales.
@@ -61,10 +67,10 @@ in
         {
           options.locale = localeModuleFactory { isGlobal = false; };
 
-          config = lib.mkIf submoduleCfg.enable {
+          config = mkIf submoduleCfg.enable {
             env.LOCALE_ARCHIVE.value = "${submoduleCfg.package}/lib/locale/locale-archive";
           };
         };
     in
-    lib.mkOption { type = with lib.types; attrsOf (submodule localeSubmodule); };
+    mkOption { type = with types; attrsOf (submodule localeSubmodule); };
 }
