@@ -9,11 +9,11 @@
     ./base.nix
     ./files.nix
     ./data-format-files.nix
-    ./xdg-desktop-entries.nix
-    ./xdg-dirs.nix
     ./locale.nix
     ./build.nix
     ./lib.nix
+    ./xdg/base-dirs.nix
+    ./xdg/desktop-entries.nix
 
     ./programs/systemd
     ./programs/gnome-session
