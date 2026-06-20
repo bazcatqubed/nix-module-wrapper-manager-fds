@@ -11,15 +11,14 @@ in
 
 let
   wmLib = (import ../../. { }).lib;
+  entry = import ../../. { };
   eval =
     args:
     wmLib.eval (
       args
       // {
         inherit pkgs;
-        modules = args.modules or [ ] ++ [
-          ../../modules/wrapper-manager/modular-services.nix
-        ];
+        modules = args.modules or [ ] ++ [ entry.wrapperModules.full ];
       }
     );
 
@@ -29,6 +28,7 @@ in
   fastfetch = buildConfig ./wrapper-fastfetch.nix;
   xdg-desktop-entry = buildConfig ./xdg-desktop-entry.nix;
   xdg-basedirs = buildConfig ./xdg-basedirs.nix;
+  xdg-portals-conf = buildConfig ./xdg-portals-conf.nix;
   single-basepackage = buildConfig ./single-basepackage.nix;
   modular-services = buildConfig ./modular-services.nix;
   with-additional-files = buildConfig ./with-additional-files.nix;

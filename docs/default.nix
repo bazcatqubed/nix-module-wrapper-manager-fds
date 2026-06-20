@@ -73,6 +73,7 @@ let
     modules = [
       ../modules/wrapper-manager
       ../modules/wrapper-manager/modular-services.nix
+      ../modules/wrapper-manager/xdg/portals-conf.nix
     ]
     ++ extraModules;
     includeModuleSystemOptions = true;

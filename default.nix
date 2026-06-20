@@ -26,6 +26,7 @@
   wrapperModules = rec {
     modular-services = ./modules/wrapper-manager/modular-services.nix;
     systemd-modular-services-integration = ./modules/wrapper-manager/programs/systemd/modular-services.nix;
+    xdg-portals-config = ./modules/wrapper-manager/xdg/portals-conf.nix;
 
     # All-in-one module package for modular service integration.
     modular-services-full = {
@@ -34,6 +35,13 @@
         systemd-modular-services-integration
       ];
     };
+
+    # THE all-in-one module, basically the full package. All optional modules
+    # should go here.
+    full.imports = [
+      modular-services-full
+      xdg-portals-config
+    ];
   };
 
   # The main library interface that can be used for immediate consumption.
