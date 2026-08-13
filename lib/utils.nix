@@ -195,7 +195,7 @@ rec {
     loc: wrapperConfig:
     lib.map (
       n:
-      builtins.trace wrapperConfig {
+      wrapperConfig {
         message = "in ${lib.showOption loc}: ${n.message}";
         assertion = n.assertion;
       }
