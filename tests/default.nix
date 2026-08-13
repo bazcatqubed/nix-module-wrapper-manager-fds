@@ -21,6 +21,9 @@ in
     lib = wrapperManagerLibTests;
   };
 
+  builds =
+    lib.mapAttrs (n: v: v.config.build.toplevel) configs;
+
   results = {
     configs =
       let
