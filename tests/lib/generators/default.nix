@@ -80,4 +80,36 @@ lib.runTests {
       Description=WHAAAAT
     '';
   };
+
+  testsGlibINIBasic = {
+    expr = self.generators.toGlibINI {
+      greetings.hello = "WORLD";
+    };
+    expected = ''
+      [greetings]
+      hello=WORLD
+    '';
+  };
+
+  testsGlibINIBasicGNOMESession = {
+    expr = self.generators.toGlibINI {
+      "GNOME Session" = {
+        Kiosk = false;
+        Name = "HELLO Session";
+        "Name[tl]" = "HELLO Session";
+        RequiredComponents = [
+          "org.gnome.SettingsDaemon.A11ySettings"
+          "org.gnome.SettingsDaemon.Color"
+          "org.gnome.SettingsDaemon.Printing"
+        ];
+      };
+    };
+    expected = ''
+      [GNOME Session]
+      Kiosk=false
+      Name=HELLO Session
+      Name[tl]=HELLO Session
+      RequiredComponents=org.gnome.SettingsDaemon.A11ySettings;org.gnome.SettingsDaemon.Color;org.gnome.SettingsDaemon.Printing
+    '';
+  };
 }

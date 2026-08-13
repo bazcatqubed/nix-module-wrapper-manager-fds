@@ -100,6 +100,6 @@ rec {
         in
         attrsOf (attrsOf atomUnit);
 
-      generate = name: value: pkgs.writeText name (lib.generators.toDconfINI value);
+      generate = name: value: pkgs.writeText name (self.generators.toGlibINI value);
     };
 }

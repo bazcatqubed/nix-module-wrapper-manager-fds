@@ -8,7 +8,7 @@
   self,
 }:
 
-{
+rec {
   /**
     Render a given value to systemd INI data format.
 
@@ -87,4 +87,51 @@
           + toKeyValue sectValues;
     in
     mapAttrsToStringsSep "\n" mkSection attrsOfSections;
+
+  /**
+    Render the value in GLib INI-like format. For more information on the
+    format, see https://docs.gtk.org/glib/struct.KeyFile.html.
+
+    # Arguments
+
+    value
+    : Contains the value to be converted into a string. This accepts the same
+    arguments as `lib.generators.toINI` from nixpkgs.
+
+    # Type
+
+    ```nix
+    toGlibINI :: Attrs -> String
+    ```
+
+    # Examples
+
+    ```nix
+    toGlibINI {
+      "GNOME Session" = {
+        Name = "HELLO";
+        RequiredComponents = [
+          "org.gnome.SettingsDaemon.A11ySettings"
+          "org.gnome.SettingsDaemon.Color"
+        ];
+      };
+    }
+    => ''
+    [GNOME Session]
+    Name="HELLO"
+    RequiredComponents=org.gnome.SettingsDaemon.A11ySettings;org.gnome.SettingsDaemon.Color
+    ''
+    ```
+  */
+  toGlibINI = lib.generators.toINI { mkKeyValue = mkGlibKeyValue; };
+
+  /**
+    `lib.generators.mkKeyValueDefault` function that converts into GLib INI
+    format.
+  */
+  mkGlibKeyValue = lib.generators.mkKeyValueDefault {
+    mkValueString = v:
+      if lib.isList v then lib.concatStringsSep ";" v
+      else lib.generators.mkValueStringDefault { } v;
+  } "=";
 }
